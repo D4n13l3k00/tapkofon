@@ -22,7 +22,10 @@ if __name__ == '__main__':
 
 templates = Jinja2Templates(directory="templates")
 
-app = FastAPI()
+app = FastAPI(
+    title="Tapkofon API",
+    version="1.0"
+)
 user = TelegramClient(
     "session",
     config.api_id,
