@@ -1,0 +1,56 @@
+<a href="/">К списку чатов</a>
+<h4>Чат - {{ chat.title or chat.first_name }}</h4>
+<form enctype="multipart/form-data" action="/chat/{{ chat.id }}/send_message" method="post">
+    <input type="text" name="text" placeholder="Введите текст...">
+    <input type="file" name="file">
+    <button type="submit">»</button>
+</form>
+{% if page == 0 %}
+    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
+{% elif page > 0 %}
+    <a href="/chat/{{ chat.id }}">К началу</a> <a href="/chat/{{ chat.id }}?page={{ page-1 }}">«-</a> <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
+{% endif %}
+{% if messages %}
+    {% for m in messages %}
+        <hr>
+        {% if m.mentioned %}
+            <small><strong>Вас упомянули здесь</strong></small>
+        {% endif %}
+        <strong>{{ m.sender.first_name or m.sender.title }}</strong>
+        {% if m.reply %}
+            <br>
+            <p>
+                <strong>Ответ к</strong> {{ m.reply.name }} <br>
+                {% if m.reply.file %}
+                    <a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Получить файл {{ m.reply.file.filename }} ({{ m.reply.file.size }} | {{ m.reply.file.type }})]</a>
+                    <br>
+                {% endif %}
+                <small>{{ m.reply.text|safe }}</small>
+            </p>
+            
+            <h5>--------------</h5>
+        {% endif %}
+        {% if m.file %}
+            <br>
+            <a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Получить файл {{ m.file.filename }} ({{ m.file.size }} | {{ m.file.type }})]</a>
+        {% endif %}
+        {% if m.text %}
+            <p>{{ m.text|safe }}</p>
+        {% endif %}
+        <br>
+        <small>{{ m.date }}</small>
+        <a href="/chat/{{ chat.id }}/reply/{{ m.id }}">Ответить</a>
+        <a href="/chat/{{ chat.id }}/delete/{{ m.id }}">Удалить</a>
+        {% if m.out %}
+            <a href="/chat/{{ chat.id }}/edit/{{ m.id }}">Изменить</a>
+        {% endif %}
+    {% endfor %}
+{% else %}
+<p>Сообщение пока нет...</p>
+{% endif %}
+<hr>
+{% if page == 0 %}
+    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
+{% elif page > 0 %}
+    <a href="/chat/{{ chat.id }}">К началу</a> <a href="/chat/{{ chat.id }}?page={{ page-1 }}">«-</a> <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
+{% endif %}

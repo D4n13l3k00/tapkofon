@@ -1,0 +1,9 @@
+<h4>Тапкофон - Чаты</h4>
+<ul>
+    {% for i in chats %}
+    <li> <a href="/chat/{{ i.id }}">{{ i.title }} {%+ if i.unread %} [{{ i.unread }}] {% endif %}</a></li>
+    {% endfor %}
+</ul>
+<a href="/cache">Кеш</a>
+<br>
+<a href="/auth">Авторизация</a>

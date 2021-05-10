@@ -1,0 +1,9 @@
+<h5>Ответить на сообщение {{ id }}</h5>
+<form enctype="multipart/form-data" action="/chat/{{ chat }}/send_message" method="post">
+    <input type="hidden" name="id" value="{{ chat }}">
+    <input type="text"   name="text" placeholder="Введите текст...">
+    <input type="hidden" name="reply_to" value="{{ id }}">
+    <input type="file" name="file">
+    <button type="submit">»</button>
+</form>
+<a href="/chat/{{ chat }}">Назад в чат</a>

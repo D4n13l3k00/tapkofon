@@ -1,0 +1,14 @@
+{% if msg %}
+    <p>{{ msg }}</p>
+{% endif %}
+<form action="/auth" method="get">
+    <p>Номер телефона</p>
+    <input type="text" name="phone" value="{{ phone }}">
+    <p>Код</p>
+    <input type="text" name="code" value="{{ code }}">
+    <p>2fa пароль (если есть)</p>
+    <input type="text" name="tfa">
+    <p></p>
+    <button type="submit">Авторизоваться</button>
+</form>
+<p><a href="/logout">Выйти из аккаунта</a></p>

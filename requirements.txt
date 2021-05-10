@@ -1,0 +1,7 @@
+telethon
+fastapi
+python-multipart
+jinja2
+emoji
+pydantic
+pydub
