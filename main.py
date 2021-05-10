@@ -33,16 +33,28 @@ user = TelegramClient(
 )
 user.parse_mode = "html"
 ##### / Работа с подключением / #####
-@app.get("/logout", response_class=HTMLResponse)
+@app.get(
+    "/logout",
+    description="Деавторизоваться",
+    response_class=HTMLResponse
+)
 async def logout():
     await user.log_out()
     return templates.get_template("auth/logout.html").render()
-@app.get("/auth_old", response_class=HTMLResponse)
+@app.get(
+    "/auth_old",
+    description="Авторизация через терминал",
+    response_class=HTMLResponse
+)
 async def auth_old():
     await user.start()
     me = await user.get_me()
     return templates.get_template("auth/authorized.jinja2").render(me=me)
-@app.get("/auth", response_class=HTMLResponse)
+@app.get(
+    "/auth",
+    description="Веб-Авторизация",
+    response_class=HTMLResponse
+)
 async def auth(phone: Optional[str] = None, code: Optional[str] = None, tfa: Optional[str] = None ):
     if not phone:
         await user.connect()
@@ -82,7 +94,11 @@ async def auth(phone: Optional[str] = None, code: Optional[str] = None, tfa: Opt
                 return templates.get_template("auth/auth.jinja2").render(phone=phone, code=code, msg=' '.join(ex.args))
 
 ##### / Список чатов / #####
-@app.get("/", response_class=HTMLResponse)
+@app.get(
+    "/",
+    description="Список чатов",
+    response_class=HTMLResponse
+)
 async def get_dialogs():
     if not user.is_connected():
         await user.connect()
@@ -99,7 +115,11 @@ async def get_dialogs():
     return templates.get_template("chats.jinja2").render(chats=chats)
 
 ##### / Чат / #####
-@app.get("/chat/{id}", response_class=HTMLResponse)
+@app.get(
+    "/chat/{id}",
+    description="Чат",
+    response_class=HTMLResponse
+)
 async def chat(id: str, page: Optional[int]=0):
     if not user.is_connected():
         await user.connect()
@@ -159,7 +179,11 @@ async def chat(id: str, page: Optional[int]=0):
         return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
 
 ##### / Реплай / #####
-@app.get("/chat/{id}/reply/{msg_id}", response_class=HTMLResponse)
+@app.get(
+    "/chat/{id}/reply/{msg_id}",
+    description="Реплай на сообщение",
+    response_class=HTMLResponse
+)
 async def chat(id: str, msg_id: int):
     if not user.is_connected():
         await user.connect()
@@ -172,7 +196,11 @@ async def chat(id: str, msg_id: int):
         return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
 ##### / Отправка сообщения / #####
-@app.post("/chat/{id}/send_message", response_class=HTMLResponse)
+@app.post(
+    "/chat/{id}/send_message",
+    description="API Отправка сообщения",
+    response_class=HTMLResponse
+)
 async def chat(id: str, text: Optional[str] = Form(None), reply_to: Optional[int] = Form(None), file: Optional[UploadFile] = File(None)):
     if not user.is_connected():
         await user.connect()
@@ -195,7 +223,11 @@ async def chat(id: str, text: Optional[str] = Form(None), reply_to: Optional[int
         return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
 
 ##### / Работа с сообщениями / #####
-@app.get("/chat/{id}/edit/{msg_id}", response_class=HTMLResponse)
+@app.get(
+    "/chat/{id}/edit/{msg_id}",
+    description="Изменить сообщение",
+    response_class=HTMLResponse
+)
 async def chat(id: str, msg_id: int):
     if not user.is_connected():
         await user.connect()
@@ -214,7 +246,11 @@ async def chat(id: str, msg_id: int):
         print(traceback.format_exc())
         return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
-@app.post("/chat/{id}/edit_message", response_class=HTMLResponse)
+@app.post(
+    "/chat/{id}/edit_message",
+    description="API Изменить соообщение",
+    response_class=HTMLResponse
+)
 async def chat(id: str, msg_id: int = Form(...), text: str = Form(...)):
     if not user.is_connected():
         await user.connect()
@@ -234,7 +270,11 @@ async def chat(id: str, msg_id: int = Form(...), text: str = Form(...)):
         print(traceback.format_exc())
         return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
 
-@app.get("/chat/{id}/delete/{msg_id}", response_class=HTMLResponse)
+@app.get(
+    "/chat/{id}/delete/{msg_id}",
+    description="Удаление сообщения",
+    response_class=HTMLResponse
+)
 async def chat(id: str, msg_id: int):
     if not user.is_connected():
         await user.connect()
@@ -255,7 +295,11 @@ async def chat(id: str, msg_id: int):
         return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
 ##### / Загрузка и стримминг файла из кеша / #####
-@app.get("/chat/{id}/download/{msg_id}", response_class=HTMLResponse)
+@app.get(
+    "/chat/{id}/download/{msg_id}",
+    description="Загрузка файла",
+    response_class=HTMLResponse
+)
 async def chat(id: str, msg_id: int):
     if not user.is_connected():
         await user.connect()
@@ -290,15 +334,27 @@ async def chat(id: str, msg_id: int):
         return HTMLResponse(templates.get_template("error.jinja2").render(error=ex.args))
 
 ##### / Кеш / #####
-@app.get("/cache", response_class=HTMLResponse)
+@app.get(
+    "/cache",
+    description="Кеш",
+    response_class=HTMLResponse
+)
 async def cache():
     size = utils.humanize(utils.get_size('cache'))
     return templates.get_template("cache.jinja2").render(size=size)
-@app.get("/cache/clear", response_class=HTMLResponse)
+@app.get(
+    "/cache/clear",
+    description="Очистить кеш",
+    response_class=HTMLResponse
+)
 async def cache():
     utils.clear_dir('cache')
     return RedirectResponse("/cache")
-@app.get("/cache/list", response_class=HTMLResponse)
+@app.get(
+    "/cache/list",
+    description="Дерево кеша",
+    response_class=HTMLResponse
+)
 async def cache():
     var = ""
     paths = utils.DisplayablePath.make_tree(Path('cache'))
