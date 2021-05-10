@@ -9,6 +9,7 @@ class Chat(BaseModel):
     unread: int
 class MessageMedia(BaseModel):
     type: Optional[str] = None
+    typ: Optional[str] = None
     filename: Optional[str] = None
     size: Optional[str] = None
 class ReplyMessage(BaseModel):

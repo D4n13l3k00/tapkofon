@@ -9,6 +9,7 @@ import emoji
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
+from PIL import Image
 from pydub import AudioSegment
 from telethon.sync import TelegramClient, errors, types
 
@@ -158,6 +159,7 @@ async def chat(id: str, page: Optional[int]=0):
             if m.file:
                 file = models.MessageMedia(
                     type=m.file.mime_type,
+                    typ=m.file.mime_type.split("/")[0],
                     size=utils.humanize(m.file.size),
                     filename=m.file.name
                 )
@@ -323,6 +325,11 @@ async def chat(id: str, msg_id: int):
                         file = f"cache/{id}/{msg_id}/audio.mp3"
                         AudioSegment.from_file(path).export(file)
                         os.remove(path)
+                    elif msg.file.mime_type.split("/")[0] == "image":
+                        file = f"cache/{id}/{msg_id}/image."+config.pic_format
+                        im = Image.open(io.BytesIO(await msg.download_media(bytes))).convert("RGB")
+                        im.thumbnail((config.pic_max_size, config.pic_max_size), 1)
+                        im.save(file, format=config.pic_format)
                     else:
                         file = await msg.download_media(path)
                     stream = open(file, mode="rb")

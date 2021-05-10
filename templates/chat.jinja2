@@ -32,7 +32,11 @@
         {% endif %}
         {% if m.file %}
             <br>
-            <a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Получить файл {{ m.file.filename }} ({{ m.file.size }} | {{ m.file.type }})]</a>
+            {% if m.file.typ == "image" %}
+                <img src="/chat/{{ chat.id }}/download/{{ m.id }}" alt="Фото {{ m.id }}">
+            {% else %}
+                <a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Получить файл {{ m.file.filename }} ({{ m.file.size }} | {{ m.file.type }})]</a>
+            {% endif %}
         {% endif %}
         {% if m.text %}
             <p>{{ m.text|safe }}</p>
