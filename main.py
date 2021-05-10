@@ -210,7 +210,7 @@ async def chat(id: str, text: Optional[str] = Form(None), reply_to: Optional[int
         try: id = int(id)
         except: pass
         chat = await user.get_entity(id)
-        if file.file.read():
+        if file and file.file.read():
             file.file.seek(0)
             f = io.BytesIO(file.file.read())
             f.name = file.filename
