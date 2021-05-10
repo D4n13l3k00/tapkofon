@@ -356,6 +356,8 @@ async def cache():
     response_class=HTMLResponse
 )
 async def cache():
+    if not os.path.isdir('cache') or os.listdir('cache') == []:
+        return "Cache is empty"
     var = ""
     paths = utils.DisplayablePath.make_tree(Path('cache'))
     for path in paths:
