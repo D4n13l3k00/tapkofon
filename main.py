@@ -340,7 +340,8 @@ async def chat(id: str, msg_id: int):
     response_class=HTMLResponse
 )
 async def cache():
-    size = utils.humanize(utils.get_size('cache'))
+    try: size = utils.humanize(utils.get_size('cache'))
+    except: size = "0.0B"
     return templates.get_template("cache.jinja2").render(size=size)
 @app.get(
     "/cache/clear",
@@ -348,7 +349,8 @@ async def cache():
     response_class=HTMLResponse
 )
 async def cache():
-    utils.clear_dir('cache')
+    try: utils.clear_dir('cache')
+    except: pass
     return RedirectResponse("/cache")
 @app.get(
     "/cache/list",
