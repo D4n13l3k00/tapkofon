@@ -14,7 +14,7 @@
     {% for m in messages %}
         <hr>
         {% if m.mentioned %}
-            <small><strong>Вас упомянули здесь</strong></small>
+            <small><strong>Вас тегнул</strong></small>
         {% endif %}
         <strong>{{ m.sender.first_name or m.sender.title }}</strong>
         {% if m.reply %}
