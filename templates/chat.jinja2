@@ -29,7 +29,10 @@
                         <a href="/chat/{{ chat.id }}/download/{{ m.reply.id }}">[Получить файл {{ m.reply.file.filename }} ({{ m.reply.file.size }} | {{ m.reply.file.type }})]</a>
                     {% endif %}
                 {% endif %}
-                <small>{{ m.reply.text|safe }}</small>
+                {% if m.reply.text %}
+                    <br>
+                    <small>{{ m.reply.text|safe }}</small>
+                {% endif %}
             </p>
             <p>------------</p>
         {% endif %}

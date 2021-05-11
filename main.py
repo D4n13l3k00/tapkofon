@@ -1,12 +1,10 @@
 import io
 import os
-import re
 import time
 import traceback
 from pathlib import Path
 from typing import *
 
-import emoji
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
@@ -70,7 +68,7 @@ async def auth(phone: Optional[str] = None, code: Optional[str] = None, tfa: Opt
             return templates.get_template("auth/auth.jinja2").render(phone=phone, msg=f"Флудвейт! Подождите {tm}")
         except Exception as ex:
             print(traceback.format_exc())
-            return templates.get_template("auth/auth.jinja2").render(phone=phone, code=code, msg=' '.join(ex.args))
+            return templates.get_template("auth/auth.jinja2").render(phone=phone, code=code, msg='<br>'.join(ex.args))
     try:
         if tfa:
             await user.sign_in(password=tfa)
@@ -90,7 +88,7 @@ async def auth(phone: Optional[str] = None, code: Optional[str] = None, tfa: Opt
         tm = time.strftime("%Hh:%Mm:%Ss", time.gmtime(ex.seconds))
         return templates.get_template("auth/auth.jinja2").render(phone=phone, msg=f"Флудвейт! Подождите {tm}")
     except Exception as ex:
-        return templates.get_template("auth/auth.jinja2").render(phone=phone, code=code, msg=' '.join(ex.args))
+        return templates.get_template("auth/auth.jinja2").render(phone=phone, code=code, msg='<br>'.join(ex.args))
 
 ##### / Список чатов / #####
 @app.get(
@@ -334,7 +332,7 @@ async def download(id: str, msg_id: int):
             else:
                 return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.jinja2").render(error=ex.args))
+        return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
 ##### / Юзер / #####
 @app.get(
@@ -358,7 +356,7 @@ async def user_avatar(id: str):
         out.seek(0)
         return StreamingResponse(out)
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.jinja2").render(error=ex.args))
+        return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
 @app.get(
     "/user/{id}",
@@ -377,7 +375,7 @@ async def user_info(id: str):
         user_full = await user(functions.users.GetFullUserRequest(id=id))
         return HTMLResponse(templates.get_template("user.jinja2").render(user=user_, user_full=user_full))
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.jinja2").render(error=ex.args))
+        return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
 ##### / Кеш / #####
 @app.get(
@@ -389,6 +387,7 @@ async def cache():
     try: size = utils.humanize(utils.get_size('cache'))
     except: size = "0.0B"
     return templates.get_template("cache.jinja2").render(size=size)
+
 @app.get(
     "/cache/clear",
     description="Очистить кеш",
@@ -398,6 +397,7 @@ async def cache():
     try: utils.clear_dir('cache')
     except: pass
     return RedirectResponse("/cache")
+
 @app.get(
     "/cache/list",
     description="Дерево кеша",
