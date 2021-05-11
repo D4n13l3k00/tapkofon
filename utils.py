@@ -1,5 +1,22 @@
-import os, shutil
+import os
+import re
+import shutil
 from pathlib import Path
+
+import emoji
+
+import config
+
+
+def replacing_text(text: str):
+    return \
+        re.sub(
+            config.msg_replace_regex,
+            config.msg_regex_to,
+            emoji.demojize(
+                text.replace('\n', '<br>')
+                )
+            ) if config.msg_regex_tme else emoji.demojize(text.replace('\n', '<br>'))
 
 class DisplayablePath(object):
     display_filename_prefix_middle = '├──'

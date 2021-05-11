@@ -1,5 +1,6 @@
 import io
 import os
+import re
 import time
 import traceback
 from pathlib import Path
@@ -145,6 +146,7 @@ async def chat(id: str, page: Optional[int]=0):
                 if r.file:
                     rfile = models.MessageMedia(
                     type=r.file.mime_type,
+                    typ=r.file.mime_type.split("/")[0],
                     size=utils.humanize(r.file.size),
                     filename=r.file.name
                     )
@@ -154,7 +156,7 @@ async def chat(id: str, page: Optional[int]=0):
                     name=name,
                     id=r.id,
                     file=rfile,
-                    text=emoji.demojize(r.text)
+                    text=utils.replacing_text(r.text) if r.text else None
                 )
             if m.file:
                 file = models.MessageMedia(
@@ -168,7 +170,7 @@ async def chat(id: str, page: Optional[int]=0):
             msgs.append(models.Message(
                 id=m.id,
                 sender=m.sender,
-                text=emoji.demojize(m.text.replace('\n', '<br>')) if m.text else None,
+                text=utils.replacing_text(m.text) if m.text else None,
                 file=file,
                 reply=reply,
                 mentioned=m.mentioned,
@@ -179,14 +181,13 @@ async def chat(id: str, page: Optional[int]=0):
     except Exception as ex:
         print(traceback.format_exc())
         return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
-
 ##### / Реплай / #####
 @app.get(
     "/chat/{id}/reply/{msg_id}",
     description="Реплай на сообщение",
     response_class=HTMLResponse
 )
-async def chat(id: str, msg_id: int):
+async def reply_to_msg(id: str, msg_id: int):
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
@@ -203,7 +204,7 @@ async def chat(id: str, msg_id: int):
     description="API Отправка сообщения",
     response_class=HTMLResponse
 )
-async def chat(id: str, text: Optional[str] = Form(None), reply_to: Optional[int] = Form(None), file: Optional[UploadFile] = File(None)):
+async def send_message(id: str, text: Optional[str] = Form(None), reply_to: Optional[int] = Form(None), file: Optional[UploadFile] = File(None)):
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
@@ -230,7 +231,7 @@ async def chat(id: str, text: Optional[str] = Form(None), reply_to: Optional[int
     description="Изменить сообщение",
     response_class=HTMLResponse
 )
-async def chat(id: str, msg_id: int):
+async def edit(id: str, msg_id: int):
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
@@ -253,7 +254,7 @@ async def chat(id: str, msg_id: int):
     description="API Изменить соообщение",
     response_class=HTMLResponse
 )
-async def chat(id: str, msg_id: int = Form(...), text: str = Form(...)):
+async def edit_message(id: str, msg_id: int = Form(...), text: str = Form(...)):
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
@@ -277,7 +278,7 @@ async def chat(id: str, msg_id: int = Form(...), text: str = Form(...)):
     description="Удаление сообщения",
     response_class=HTMLResponse
 )
-async def chat(id: str, msg_id: int):
+async def delete_message(id: str, msg_id: int):
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
@@ -301,7 +302,7 @@ async def chat(id: str, msg_id: int):
     "/chat/{id}/download/{msg_id}",
     description="Загрузка файла"
 )
-async def chat(id: str, msg_id: int):
+async def download(id: str, msg_id: int):
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():

@@ -22,11 +22,16 @@
             <p>
                 <strong>Ответ к</strong> {{ m.reply.name }} <br>
                 {% if m.reply.file %}
-                    <a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Получить файл {{ m.reply.file.filename }} ({{ m.reply.file.size }} | {{ m.reply.file.type }})]</a>
                     <br>
+                    {% if m.reply.file.typ == "image" %}
+                        <a href="/chat/{{ chat.id }}/download/{{ m.reply.id }}"><img src="/chat/{{ chat.id }}/download/{{ m.reply.id }}" alt="Фото {{ m.reply.id }}"></a>
+                    {% else %}
+                        <a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Получить файл {{ m.reply.file.filename }} ({{ m.reply.file.size }} | {{ m.reply.file.type }})]</a>
+                    {% endif %}
                 {% endif %}
                 <small>{{ m.reply.text|safe }}</small>
             </p>
+            <p>------------</p>
         {% endif %}
         {% if m.file %}
             <br>
