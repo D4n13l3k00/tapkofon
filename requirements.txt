@@ -1,9 +1,9 @@
 emoji
-fastapi
+pydub
 jinja2
 pillow
-pydantic
-pydub
-python-multipart
-telethon
+fastapi
 uvicorn
+pydantic
+telethon
+python-multipart
