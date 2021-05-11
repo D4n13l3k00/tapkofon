@@ -1,0 +1,18 @@
+{% if user.deleted %}
+    <h4>Удалённый аккаунт</h4>
+{% else %}
+    {% if user.photo %}
+        <img src="/user/{{ user.id }}/avatar" alt="{{ user.id }}">
+    {% endif %}
+    <h4>{{user.first_name}}{%+ if user.last_name %} {{ user.last_name }} {% endif %} {%+ if user.scam %} - [Scam] {% endif %}</h4>
+    {% if user.phone %}
+        <h4>Номер: <small>{{ user.phone }}</small></h4>
+    {% endif %}
+    {% if user.username %}
+        <h4>Юзерка: <small>@{{ user.username }}</small></h4>
+    {% endif %}
+    <h4>ID: <small>{{ user.id }}</small></h4>
+    {% if user_full.about %}
+        <h4>О себе: <small>{{ user_full.about }}</small></h4>
+    {% endif %}
+{% endif %}

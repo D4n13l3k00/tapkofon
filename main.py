@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from PIL import Image
 from pydub import AudioSegment
-from telethon.sync import TelegramClient, errors, types
+from telethon.sync import TelegramClient, errors, functions, types
 
 import config
 import models
@@ -299,8 +299,7 @@ async def chat(id: str, msg_id: int):
 ##### / Загрузка и стримминг файла из кеша / #####
 @app.get(
     "/chat/{id}/download/{msg_id}",
-    description="Загрузка файла",
-    response_class=HTMLResponse
+    description="Загрузка файла"
 )
 async def chat(id: str, msg_id: int):
     if not user.is_connected():
@@ -319,23 +318,75 @@ async def chat(id: str, msg_id: int):
                     stream = open(file, mode="rb")
                     return StreamingResponse(stream, media_type=msg.file.mime_type)
                 else:
-                    path = f"cache/{id}/{msg_id}/{msg.file.name}"
-                    await msg.download_media(path)
+                    for i in ["cache/", f"cache/{id}/", f"cache/{id}/{msg_id}/"]:
+                        if not os.path.isdir(i): os.mkdir(i)
                     if msg.file.mime_type.split("/")[0] == "audio" and msg.file.ext != ".mp3":
                         file = f"cache/{id}/{msg_id}/audio.mp3"
-                        AudioSegment.from_file(path).export(file)
-                        os.remove(path)
+                        m_ = io.BytesIO(await msg.download_media(bytes))
+                        m_.name = "audio.wav"
+                        AudioSegment.from_file(m_).export(file)
                     elif msg.file.mime_type.split("/")[0] == "image":
                         file = f"cache/{id}/{msg_id}/image."+config.pic_format
-                        im = Image.open(io.BytesIO(await msg.download_media(bytes))).convert("RGB")
-                        im.thumbnail((config.pic_max_size, config.pic_max_size), 1)
-                        im.save(file, format=config.pic_format)
+                        m_ = io.BytesIO(await msg.download_media(bytes))
+                        m_.name = "pic.png"
+                        im = Image.open(m_).convert("RGBA")
+                        im.load()
+                        bg = Image.new("RGB", im.size, (255, 255, 255))
+                        bg.paste(im, mask = im.split()[3])
+                        bg.thumbnail((config.pic_max_size, config.pic_max_size), 1)
+                        bg.save(file, config.pic_format, quality=config.pic_quality)
                     else:
+                        path = f"cache/{id}/{msg_id}/{msg.file.name}"
                         file = await msg.download_media(path)
                     stream = open(file, mode="rb")
                     return StreamingResponse(stream, media_type=msg.file.mime_type)
             else:
                 return HTMLResponse(templates.get_template("error.jinja2")).render(error="Такого сообщения не существует")
+    except Exception as ex:
+        print(traceback.format_exc())
+        return HTMLResponse(templates.get_template("error.jinja2").render(error=ex.args))
+
+##### / Юзер / #####
+@app.get(
+    "/user/{id}/avatar",
+    description="Аватарка пользователя"
+)
+async def user_avatar(id: str):
+    if not user.is_connected():
+        await user.connect()
+    if not await user.is_user_authorized():
+        return templates.get_template("auth/not_authorized.html").render()
+    try:
+        try: id = int(id)
+        except: pass
+        user_ = await user.get_entity(id)
+        out = io.BytesIO()
+        out.name = ""+config.pic_format
+        im = Image.open(io.BytesIO(await user.download_profile_photo(user_, bytes))).convert("RGB")
+        im.thumbnail((config.pic_max_size, config.pic_max_size), 1)
+        im.save(out, format=config.pic_format)
+        out.seek(0)
+        return StreamingResponse(out)
+    except Exception as ex:
+        print(traceback.format_exc())
+        return HTMLResponse(templates.get_template("error.jinja2").render(error=ex.args))
+
+@app.get(
+    "/user/{id}",
+    description="Профиль пользователя",
+    response_class=HTMLResponse
+)
+async def user_info(id: str):
+    if not user.is_connected():
+        await user.connect()
+    if not await user.is_user_authorized():
+        return templates.get_template("auth/not_authorized.html").render()
+    try:
+        try: id = int(id)
+        except: pass
+        user_ = await user.get_entity(id)
+        user_full = await user(functions.users.GetFullUserRequest(id=id))
+        return HTMLResponse(templates.get_template("user.jinja2").render(user=user_, user_full=user_full))
     except Exception as ex:
         print(traceback.format_exc())
         return HTMLResponse(templates.get_template("error.jinja2").render(error=ex.args))

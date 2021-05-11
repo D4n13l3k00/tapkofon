@@ -16,7 +16,7 @@
         {% if m.mentioned %}
             <small><strong>Вас тегнул</strong></small>
         {% endif %}
-        <strong>{{ m.sender.first_name or m.sender.title }}</strong>
+        <strong><a href="/user/{{ m.sender.id }}">{{ m.sender.first_name or m.sender.title }}</a></strong>
         {% if m.reply %}
             <br>
             <p>
@@ -27,21 +27,19 @@
                 {% endif %}
                 <small>{{ m.reply.text|safe }}</small>
             </p>
-            
-            <h5>--------------</h5>
         {% endif %}
         {% if m.file %}
             <br>
             {% if m.file.typ == "image" %}
-                <img src="/chat/{{ chat.id }}/download/{{ m.id }}" alt="Фото {{ m.id }}">
+                <a href="/chat/{{ chat.id }}/download/{{ m.id }}"><img src="/chat/{{ chat.id }}/download/{{ m.id }}" alt="Фото {{ m.id }}"></a>
             {% else %}
                 <a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Получить файл {{ m.file.filename }} ({{ m.file.size }} | {{ m.file.type }})]</a>
             {% endif %}
+            <br>
         {% endif %}
         {% if m.text %}
             <p>{{ m.text|safe }}</p>
         {% endif %}
-        <br>
         <small>{{ m.date }}</small>
         <a href="/chat/{{ chat.id }}/reply/{{ m.id }}">Ответить</a>
         <a href="/chat/{{ chat.id }}/delete/{{ m.id }}">Удалить</a>
