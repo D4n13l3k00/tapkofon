@@ -320,9 +320,9 @@ async def download(id: str, msg_id: int):
                         m_.name = "pic.png"
                         im = Image.open(m_).convert("RGBA")
                         im.load()
-                        bg = Image.new("RGB", im.size, (255, 255, 255))
+                        bg = Image.new("RGB", im.size, (255,)*3)
                         bg.paste(im, mask = im.split()[3])
-                        bg.thumbnail((config.pic_max_size, config.pic_max_size), 1)
+                        bg.thumbnail((config.pic_max_size,)*2, 1)
                         bg.save(file, config.pic_format, quality=config.pic_quality)
                     else:
                         path = f"cache/{id}/{msg_id}/{msg.file.name}"
@@ -350,8 +350,8 @@ async def user_avatar(id: str):
         user_ = await user.get_entity(id)
         out = io.BytesIO()
         out.name = ""+config.pic_format
-        im = Image.open(io.BytesIO(await user.download_profile_photo(user_, bytes))).convert("RGB")
-        im.thumbnail((config.pic_max_size, config.pic_max_size), 1)
+        im = Image.open(io.BytesIO(await user.download_profile_photo(user_, bytes)))
+        im.thumbnail((config.pic_avatar_max_size,)*2, 1)
         im.save(out, format=config.pic_format)
         out.seek(0)
         return StreamingResponse(out)
@@ -393,7 +393,7 @@ async def cache():
     description="Очистить кеш",
     response_class=HTMLResponse
 )
-async def cache():
+async def cache_clear():
     try: utils.clear_dir('cache')
     except: pass
     return RedirectResponse("/cache")
@@ -403,7 +403,7 @@ async def cache():
     description="Дерево кеша",
     response_class=HTMLResponse
 )
-async def cache():
+async def cache_list():
     if not os.path.isdir('cache') or os.listdir('cache') == []:
         return "Cache is empty"
     var = ""
