@@ -1,3 +1,8 @@
+<!--
+ Copyright 2021 d4n13l3k00.
+ SPDX-License-Identifier: 	AGPL-3.0-or-later
+-->
+
 <h5>Ответить на сообщение {{ id }}</h5>
 <form enctype="multipart/form-data" action="/chat/{{ chat }}/send_message" method="post">
     <input type="hidden" name="id" value="{{ chat }}">

@@ -1,3 +1,6 @@
+# Copyright 2021 d4n13l3k00.
+# SPDX-License-Identifier: 	AGPL-3.0-or-later
+
 import os
 import re
 import shutil
