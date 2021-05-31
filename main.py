@@ -137,10 +137,7 @@ async def chat(id: str, page: Optional[int]=0):
             r = await m.get_reply_message()
             reply = None
             if r:
-                if hasattr(r.sender, 'title'):
-                    name = r.sender.title
-                else:
-                    name = r.sender.first_name
+                name = r.sender.title if hasattr(r.sender, 'title') else r.sender.first_name
                 if r.file:
                     rfile = models.MessageMedia(
                     type=r.file.mime_type,
@@ -177,7 +174,9 @@ async def chat(id: str, page: Optional[int]=0):
             ))
         return templates.get_template("chat.jinja2").render(messages=msgs, chat=chat, page=page)
     except Exception as ex:
-        return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
+        return templates.get_template('error.jinja2').render(
+            error='<br>'.join(ex.args)
+        )
 ##### / Реплай / #####
 @app.get(
     "/chat/{id}/reply/{msg_id}",
@@ -302,40 +301,40 @@ async def download(id: str, msg_id: int):
         try: id = int(id)
         except: pass
         msg = await user.get_messages(id, ids=msg_id)
-        if msg:
-            msg: types.Message
-            if msg.file:
-                if os.path.isdir(f"cache/{id}/{msg_id}") and os.listdir(f"cache/{id}/{msg_id}/") != []:
-                    file = f"cache/{id}/{msg_id}/"+os.listdir(f"cache/{id}/{msg_id}/")[0]
-                    stream = open(file, mode="rb")
-                    return StreamingResponse(stream, media_type=msg.file.mime_type)
-                else:
-                    for i in ["cache/", f"cache/{id}/", f"cache/{id}/{msg_id}/"]:
-                        if not os.path.isdir(i): os.mkdir(i)
-                    if msg.file.mime_type.split("/")[0] == "audio" and msg.file.ext != ".mp3":
-                        file = f"cache/{id}/{msg_id}/audio.mp3"
-                        m_ = io.BytesIO(await msg.download_media(bytes))
-                        m_.name = "audio.wav"
-                        AudioSegment.from_file(m_).export(file)
-                    elif msg.file.mime_type.split("/")[0] == "image":
-                        file = f"cache/{id}/{msg_id}/image."+config.pic_format
-                        m_ = io.BytesIO(await msg.download_media(bytes))
-                        m_.name = "pic.png"
-                        im = Image.open(m_).convert("RGBA")
-                        im.load()
-                        bg = Image.new("RGB", im.size, (255,)*3)
-                        bg.paste(im, mask = im.split()[3])
-                        bg.thumbnail((config.pic_max_size,)*2, 1)
-                        bg.save(file, config.pic_format, quality=config.pic_quality)
-                    else:
-                        path = f"cache/{id}/{msg_id}/{msg.file.name}"
-                        file = await msg.download_media(path)
-                    stream = open(file, mode="rb")
-                    return StreamingResponse(stream, media_type=msg.file.mime_type)
+        if not msg or not msg.file:
+            return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+        msg: types.Message
+        if os.path.isdir(f"cache/{id}/{msg_id}") and os.listdir(f"cache/{id}/{msg_id}/") != []:
+            file = f"cache/{id}/{msg_id}/"+os.listdir(f"cache/{id}/{msg_id}/")[0]
+        else:
+            for i in ["cache/", f"cache/{id}/", f"cache/{id}/{msg_id}/"]:
+                if not os.path.isdir(i): os.mkdir(i)
+            if msg.file.mime_type.split("/")[0] == "audio" and msg.file.ext != ".mp3":
+                file = f"cache/{id}/{msg_id}/audio.mp3"
+                m_ = io.BytesIO(await msg.download_media(bytes))
+                m_.name = "audio.wav"
+                AudioSegment.from_file(m_).export(file)
+            elif msg.file.mime_type.split("/")[0] == "image":
+                file = f"cache/{id}/{msg_id}/image."+config.pic_format
+                m_ = io.BytesIO(await msg.download_media(bytes))
+                m_.name = "pic.png"
+                im = Image.open(m_).convert("RGBA")
+                im.load()
+                bg = Image.new("RGB", im.size, (255,)*3)
+                bg.paste(im, mask = im.split()[3])
+                bg.thumbnail((config.pic_max_size,)*2, 1)
+                bg.save(file, config.pic_format, quality=config.pic_quality)
             else:
-                return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+                path = f"cache/{id}/{msg_id}/{msg.file.name}"
+                file = await msg.download_media(path)
+        stream = open(file, mode="rb")
+        return StreamingResponse(stream, media_type=msg.file.mime_type)
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
+        return HTMLResponse(
+            templates.get_template('error.jinja2').render(
+                error='<br>'.join(ex.args)
+            )
+        )
 
 ##### / Юзер / #####
 @app.get(
@@ -409,8 +408,6 @@ async def cache_clear():
 async def cache_list():
     if not os.path.isdir('cache') or os.listdir('cache') == []:
         return "Cache is empty"
-    var = ""
     paths = utils.DisplayablePath.make_tree(Path('cache'))
-    for path in paths:
-        var += path.displayable() + "\n"
+    var = "".join(path.displayable() + "\n" for path in paths)
     return var.replace('\n', '<br>').replace(' ', ' ')

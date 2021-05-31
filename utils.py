@@ -31,10 +31,7 @@ class DisplayablePath(object):
         self.path = Path(str(path))
         self.parent = parent_path
         self.is_last = is_last
-        if self.parent:
-            self.depth = self.parent.depth + 1
-        else:
-            self.depth = 0
+        self.depth = self.parent.depth + 1 if self.parent else 0
 
     @property
     def displayname(self):
@@ -50,12 +47,9 @@ class DisplayablePath(object):
         displayable_root = cls(root, parent, is_last)
         yield displayable_root
 
-        children = sorted(list(path
-                               for path in root.iterdir()
-                               if criteria(path)),
-                          key=lambda s: str(s).lower())
-        count = 1
-        for path in children:
+        children = sorted([path for path in root.iterdir()
+                                   if criteria(path)], key=lambda s: str(s).lower())
+        for count, path in enumerate(children, start=1):
             is_last = count == len(children)
             if path.is_dir():
                 yield from cls.make_tree(path,
@@ -64,7 +58,6 @@ class DisplayablePath(object):
                                          criteria=criteria)
             else:
                 yield cls(path, displayable_root, is_last)
-            count += 1
 
     @classmethod
     def _default_criteria(cls, path):
