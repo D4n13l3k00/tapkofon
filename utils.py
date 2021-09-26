@@ -18,8 +18,9 @@ def replacing_text(text: str):
             config.msg_regex_to,
             emoji.demojize(
                 text.replace('\n', '<br>')
-                )
-            ) if config.msg_regex_tme else emoji.demojize(text.replace('\n', '<br>'))
+            )
+        ) if config.msg_regex_tme else emoji.demojize(text.replace('\n', '<br>'))
+
 
 class DisplayablePath(object):
     display_filename_prefix_middle = '├──'
@@ -48,7 +49,7 @@ class DisplayablePath(object):
         yield displayable_root
 
         children = sorted([path for path in root.iterdir()
-                                   if criteria(path)], key=lambda s: str(s).lower())
+                           if criteria(path)], key=lambda s: str(s).lower())
         for count, path in enumerate(children, start=1):
             is_last = count == len(children)
             if path.is_dir():
@@ -88,6 +89,8 @@ class DisplayablePath(object):
             parent = parent.parent
 
         return ''.join(reversed(parts))
+
+
 def clear_dir(folder):
     for filename in os.listdir(folder):
         file_path = os.path.join(folder, filename)
@@ -98,13 +101,17 @@ def clear_dir(folder):
                 shutil.rmtree(file_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
-def get_size(start_path = '.'):
+
+
+def get_size(start_path='.'):
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(start_path):
         for f in filenames:
             fp = os.path.join(dirpath, f)
             total_size += os.path.getsize(fp)
     return total_size
+
+
 def humanize(num: float, suffix: str = "B") -> str:
     for unit in ["", "Ki", "Mi", "Gi"]:
         if abs(num) < 1024.0:
