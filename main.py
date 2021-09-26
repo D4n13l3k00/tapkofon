@@ -259,8 +259,7 @@ async def edit_message(id: str, msg_id: int = Form(...), text: str = Form(...)):
             msg: types.Message
             await msg.edit(text)
             return templates.get_template("success.jinja2").render(id=id, text="Сообщение изменено")
-        else:
-            return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+        return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
     except Exception as ex:
         return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
 
@@ -282,8 +281,7 @@ async def delete_message(id: str, msg_id: int):
             msg: types.Message
             await msg.delete()
             return templates.get_template("success.jinja2").render(id=id, text="Сообщение удалено")
-        else:
-            return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+        return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
     except Exception as ex:
         return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
