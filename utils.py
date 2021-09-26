@@ -21,7 +21,7 @@ def replacing_text(text: str):
                 )
             ) if config.msg_regex_tme else emoji.demojize(text.replace('\n', '<br>'))
 
-class DisplayablePath(object):
+class DisplayablePath:
     display_filename_prefix_middle = '├──'
     display_filename_prefix_last = '└──'
     display_parent_prefix_middle = '    '
