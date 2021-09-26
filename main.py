@@ -3,6 +3,7 @@
 
 import io
 import os
+import sys
 import time
 import traceback
 from pathlib import Path
@@ -21,7 +22,7 @@ import utils
 
 if __name__ == '__main__':
     print("For start: uvicorn main:app --reload")
-    exit(0)
+    sys.exit(0)
 
 templates = Jinja2Templates(directory="templates")
 
