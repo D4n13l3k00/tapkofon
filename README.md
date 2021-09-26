@@ -30,7 +30,9 @@
 #### 5? Докер:
 
 Билд: `docker build -t tapik .`
+
 Создаём volume для сохранения сессии: `docker volume create tapik`
+
 Запуск: `docker run -itd -p 8888:8888 -v tapik:/root tapik`
 
 #### Фишки:
