@@ -36,6 +36,8 @@ user = TelegramClient(
 )
 user.parse_mode = "html"
 ##### / Работа с подключением / #####
+
+
 @app.get(
     "/logout",
     description="Деавторизоваться",
@@ -44,6 +46,8 @@ user.parse_mode = "html"
 async def logout():
     await user.log_out()
     return templates.get_template("auth/logout.html").render()
+
+
 @app.get(
     "/auth_old",
     description="Авторизация через терминал",
@@ -53,12 +57,14 @@ async def auth_old():
     await user.start()
     me = await user.get_me()
     return templates.get_template("auth/authorized.jinja2").render(me=me)
+
+
 @app.get(
     "/auth",
     description="Веб-Авторизация",
     response_class=HTMLResponse
 )
-async def auth(phone: Optional[str] = None, code: Optional[str] = None, tfa: Optional[str] = None ):
+async def auth(phone: Optional[str] = None, code: Optional[str] = None, tfa: Optional[str] = None):
     if not phone:
         await user.connect()
         return templates.get_template("auth/auth.jinja2").render()
@@ -94,6 +100,8 @@ async def auth(phone: Optional[str] = None, code: Optional[str] = None, tfa: Opt
         return templates.get_template("auth/auth.jinja2").render(phone=phone, code=code, msg='<br>'.join(ex.args))
 
 ##### / Список чатов / #####
+
+
 @app.get(
     "/",
     description="Список чатов",
@@ -111,23 +119,27 @@ async def get_dialogs():
             title=chat.title,
             unread=chat.unread_count)
         for chat in dialogs
-        ]
+    ]
     return templates.get_template("chats.jinja2").render(chats=chats)
 
 ##### / Чат / #####
+
+
 @app.get(
     "/chat/{id}",
     description="Чат",
     response_class=HTMLResponse
 )
-async def chat(id: str, page: Optional[int]=0):
+async def chat(id: str, page: Optional[int] = 0):
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try: id = int(id)
-        except: pass
+        try:
+            id = int(id)
+        except:
+            pass
         chat = await user.get_entity(id)
         await user.conversation(chat).mark_read()
         messages = await user.get_messages(id, limit=10, add_offset=10*page)
@@ -137,13 +149,14 @@ async def chat(id: str, page: Optional[int]=0):
             r = await m.get_reply_message()
             reply = None
             if r:
-                name = r.sender.title if hasattr(r.sender, 'title') else r.sender.first_name
+                name = r.sender.title if hasattr(
+                    r.sender, 'title') else r.sender.first_name
                 if r.file:
                     rfile = models.MessageMedia(
-                    type=r.file.mime_type,
-                    typ=r.file.mime_type.split("/")[0],
-                    size=utils.humanize(r.file.size),
-                    filename=r.file.name
+                        type=r.file.mime_type,
+                        typ=r.file.mime_type.split("/")[0],
+                        size=utils.humanize(r.file.size),
+                        filename=r.file.name
                     )
                 else:
                     rfile = None
@@ -178,6 +191,8 @@ async def chat(id: str, page: Optional[int]=0):
             error='<br>'.join(ex.args)
         )
 ##### / Реплай / #####
+
+
 @app.get(
     "/chat/{id}/reply/{msg_id}",
     description="Реплай на сообщение",
@@ -194,6 +209,8 @@ async def reply_to_msg(id: str, msg_id: int):
         return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
 ##### / Отправка сообщения / #####
+
+
 @app.post(
     "/chat/{id}/send_message",
     description="API Отправка сообщения",
@@ -205,8 +222,10 @@ async def send_message(id: str, text: Optional[str] = Form(None), reply_to: Opti
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try: id = int(id)
-        except: pass
+        try:
+            id = int(id)
+        except:
+            pass
         chat = await user.get_entity(id)
         if file and file.file.read():
             file.file.seek(0)
@@ -220,6 +239,8 @@ async def send_message(id: str, text: Optional[str] = Form(None), reply_to: Opti
         return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
 
 ##### / Работа с сообщениями / #####
+
+
 @app.get(
     "/chat/{id}/edit/{msg_id}",
     description="Изменить сообщение",
@@ -231,8 +252,10 @@ async def edit(id: str, msg_id: int):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try: id = int(id)
-        except: pass
+        try:
+            id = int(id)
+        except:
+            pass
         msg = await user.get_messages(id, ids=msg_id)
         if msg:
             msg: types.Message
@@ -240,6 +263,7 @@ async def edit(id: str, msg_id: int):
         return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
     except Exception as ex:
         return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
+
 
 @app.post(
     "/chat/{id}/edit_message",
@@ -252,17 +276,19 @@ async def edit_message(id: str, msg_id: int = Form(...), text: str = Form(...)):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try: id = int(id)
-        except: pass
+        try:
+            id = int(id)
+        except:
+            pass
         msg = await user.get_messages(id, ids=msg_id)
         if msg:
             msg: types.Message
             await msg.edit(text)
             return templates.get_template("success.jinja2").render(id=id, text="Сообщение изменено")
-        else:
-            return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+        return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
     except Exception as ex:
         return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
+
 
 @app.get(
     "/chat/{id}/delete/{msg_id}",
@@ -275,19 +301,22 @@ async def delete_message(id: str, msg_id: int):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try: id = int(id)
-        except: pass
+        try:
+            id = int(id)
+        except:
+            pass
         msg = await user.get_messages(id, ids=msg_id)
         if msg:
             msg: types.Message
             await msg.delete()
             return templates.get_template("success.jinja2").render(id=id, text="Сообщение удалено")
-        else:
-            return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+        return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
     except Exception as ex:
         return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
 ##### / Загрузка и стримминг файла из кеша / #####
+
+
 @app.get(
     "/chat/{id}/download/{msg_id}",
     description="Загрузка файла"
@@ -298,17 +327,21 @@ async def download(id: str, msg_id: int):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try: id = int(id)
-        except: pass
+        try:
+            id = int(id)
+        except:
+            pass
         msg = await user.get_messages(id, ids=msg_id)
         if not msg or not msg.file:
             return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
         msg: types.Message
         if os.path.isdir(f"cache/{id}/{msg_id}") and os.listdir(f"cache/{id}/{msg_id}/") != []:
-            file = f"cache/{id}/{msg_id}/"+os.listdir(f"cache/{id}/{msg_id}/")[0]
+            file = f"cache/{id}/{msg_id}/" + \
+                os.listdir(f"cache/{id}/{msg_id}/")[0]
         else:
             for i in ["cache/", f"cache/{id}/", f"cache/{id}/{msg_id}/"]:
-                if not os.path.isdir(i): os.mkdir(i)
+                if not os.path.isdir(i):
+                    os.mkdir(i)
             if msg.file.mime_type.split("/")[0] == "audio" and msg.file.ext != ".mp3":
                 file = f"cache/{id}/{msg_id}/audio.mp3"
                 m_ = io.BytesIO(await msg.download_media(bytes))
@@ -321,7 +354,7 @@ async def download(id: str, msg_id: int):
                 im = Image.open(m_).convert("RGBA")
                 im.load()
                 bg = Image.new("RGB", im.size, (255,)*3)
-                bg.paste(im, mask = im.split()[3])
+                bg.paste(im, mask=im.split()[3])
                 bg.thumbnail((config.pic_max_size,)*2, 1)
                 bg.save(file, config.pic_format, quality=config.pic_quality)
             else:
@@ -337,6 +370,8 @@ async def download(id: str, msg_id: int):
         )
 
 ##### / Юзер / #####
+
+
 @app.get(
     "/user/{id}/avatar",
     description="Аватарка пользователя"
@@ -347,8 +382,10 @@ async def user_avatar(id: str):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try: id = int(id)
-        except: pass
+        try:
+            id = int(id)
+        except:
+            pass
         user_ = await user.get_entity(id)
         out = io.BytesIO()
         out.name = ""+config.pic_format
@@ -359,6 +396,7 @@ async def user_avatar(id: str):
         return StreamingResponse(out)
     except Exception as ex:
         return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
+
 
 @app.get(
     "/user/{id}",
@@ -371,8 +409,10 @@ async def user_info(id: str):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try: id = int(id)
-        except: pass
+        try:
+            id = int(id)
+        except:
+            pass
         user_ = await user.get_entity(id)
         user_full = await user(functions.users.GetFullUserRequest(id=id))
         return HTMLResponse(templates.get_template("user.jinja2").render(user=user_, user_full=user_full))
@@ -380,15 +420,20 @@ async def user_info(id: str):
         return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
 
 ##### / Кеш / #####
+
+
 @app.get(
     "/cache",
     description="Кеш",
     response_class=HTMLResponse
 )
 async def cache():
-    try: size = utils.humanize(utils.get_size('cache'))
-    except: size = "0.0B"
+    try:
+        size = utils.humanize(utils.get_size('cache'))
+    except:
+        size = "0.0B"
     return templates.get_template("cache.jinja2").render(size=size)
+
 
 @app.get(
     "/cache/clear",
@@ -396,9 +441,12 @@ async def cache():
     response_class=HTMLResponse
 )
 async def cache_clear():
-    try: utils.clear_dir('cache')
-    except: pass
+    try:
+        utils.clear_dir('cache')
+    except:
+        pass
     return RedirectResponse("/cache")
+
 
 @app.get(
     "/cache/list",
