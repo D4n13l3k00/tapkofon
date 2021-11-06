@@ -9,6 +9,10 @@
     <li> <a href="/chat/{{ i.id }}">{{ i.title }} {%+ if i.unread %} [{{ i.unread }}] {% endif %}</a></li>
     {% endfor %}
 </ul>
+{% if is_passwd %}
+<a href="/lock">Заблокировать</a>
+<br>
+{% endif %}
 <a href="/cache">Кеш</a>
 <br>
 <a href="/auth">Авторизация</a>

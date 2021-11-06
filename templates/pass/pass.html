@@ -1,0 +1,14 @@
+<!--
+ Copyright 2021 d4n13l3k00.
+ SPDX-License-Identifier: 	AGPL-3.0-or-later
+-->
+
+{% if msg %}
+    <p>{{ msg }}</p>
+{% endif %}
+<form action="/pass" method="get">
+    <p>Введите пароль от тапкофона</p>
+    <input type="password" name="password">
+    <p></p>
+    <button type="submit">Открыть тапкофон</button>
+</form>

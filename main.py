@@ -9,12 +9,12 @@ import traceback
 from pathlib import Path
 from typing import *
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import Cookie, FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from PIL import Image
 from pydub import AudioSegment
-from telethon.sync import TelegramClient, errors, functions, types
+from telethon import TelegramClient, errors, functions, types
 
 import config
 import models
@@ -39,6 +39,20 @@ user.parse_mode = "html"
 ##### / Работа с подключением / #####
 
 
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    if request.url.path != '/pass':
+        if config.passwd:
+            if 'access_token' not in request.cookies or request.cookies['access_token'] != config.access_cookie:
+                return RedirectResponse('/pass')
+        else:
+            response = await call_next(request)
+            response.set_cookie('access_token', config.access_cookie)
+            return response
+    response = await call_next(request)
+    return response
+
+
 @app.get(
     "/logout",
     description="Деавторизоваться",
@@ -57,9 +71,38 @@ async def logout():
 async def auth_old():
     await user.start()
     me = await user.get_me()
-    return templates.get_template("auth/authorized.jinja2").render(me=me)
+    return templates.get_template("auth/authorized.html").render(me=me)
 
 
+@app.get(
+    "/pass",
+    description="Код-пароль доступа",
+    response_class=HTMLResponse
+)
+async def passwd(password: Optional[str] = None, access_token: Optional[str] = Cookie(None)):
+    if not config.passwd:
+        r = RedirectResponse('/')
+        r.set_cookie('access_token', config.access_cookie)
+        return r
+    if config.passwd:
+        if (password == config.passwd) or (access_token == config.access_cookie):
+            r = RedirectResponse('/')
+            r.set_cookie('access_token', config.access_cookie)
+            return r
+        if not password:
+            return templates.get_template("pass/pass.html").render()
+
+        return HTMLResponse(templates.get_template("pass/pass.html").render(msg="Неверный код/куки"))
+@app.get(
+    "/lock",
+    description="Заблокировать",
+    response_class=HTMLResponse
+)
+async def lock(request: Request):
+    r = RedirectResponse('/pass')
+    r.delete_cookie('access_token')
+    return r
+    
 @app.get(
     "/auth",
     description="Веб-Авторизация",
@@ -68,17 +111,17 @@ async def auth_old():
 async def auth(phone: Optional[str] = None, code: Optional[str] = None, tfa: Optional[str] = None):
     if not phone:
         await user.connect()
-        return templates.get_template("auth/auth.jinja2").render()
+        return templates.get_template("auth/auth.html").render()
     if not code:
         try:
             await user.sign_in(phone)
-            return templates.get_template("auth/auth.jinja2").render(phone=phone, code=code, tfa=tfa)
+            return templates.get_template("auth/auth.html").render(phone=phone, code=code, tfa=tfa)
         except errors.FloodWaitError as ex:
             tm = time.strftime("%Hh:%Mm:%Ss", time.gmtime(ex.seconds))
-            return templates.get_template("auth/auth.jinja2").render(phone=phone, msg=f"Флудвейт! Подождите {tm}")
+            return templates.get_template("auth/auth.html").render(phone=phone, msg=f"Флудвейт! Подождите {tm}")
         except Exception as ex:
             print(traceback.format_exc())
-            return templates.get_template("auth/auth.jinja2").render(phone=phone, code=code, msg='<br>'.join(ex.args))
+            return templates.get_template("auth/auth.html").render(phone=phone, code=code, msg='<br>'.join(ex.args))
     try:
         if tfa:
             await user.sign_in(password=tfa)
@@ -86,19 +129,19 @@ async def auth(phone: Optional[str] = None, code: Optional[str] = None, tfa: Opt
             await user.sign_in(code=code)
         await user.sign_in(phone)
         me = await user.get_me()
-        return templates.get_template("auth/authorized.jinja2").render(me=me)
+        return templates.get_template("auth/authorized.html").render(me=me)
     except errors.SessionPasswordNeededError as ex:
-        return templates.get_template("auth/auth.jinja2").render(phone=phone, msg="Введите 2FA пароль")
+        return templates.get_template("auth/auth.html").render(phone=phone, msg="Введите 2FA пароль")
     except errors.PhoneCodeInvalidError as ex:
-        return templates.get_template("auth/auth.jinja2").render(phone=phone, msg="Неверный код")
+        return templates.get_template("auth/auth.html").render(phone=phone, msg="Неверный код")
     except errors.PhoneCodeExpiredError as ex:
         await user.send_code_request(phone, force_sms=True)
-        return templates.get_template("auth/auth.jinja2").render(phone=phone, msg="Время кода истекло")
+        return templates.get_template("auth/auth.html").render(phone=phone, msg="Время кода истекло")
     except errors.FloodWaitError as ex:
         tm = time.strftime("%Hh:%Mm:%Ss", time.gmtime(ex.seconds))
-        return templates.get_template("auth/auth.jinja2").render(phone=phone, msg=f"Флудвейт! Подождите {tm}")
+        return templates.get_template("auth/auth.html").render(phone=phone, msg=f"Флудвейт! Подождите {tm}")
     except Exception as ex:
-        return templates.get_template("auth/auth.jinja2").render(phone=phone, code=code, msg='<br>'.join(ex.args))
+        return templates.get_template("auth/auth.html").render(phone=phone, code=code, msg='<br>'.join(ex.args))
 
 ##### / Список чатов / #####
 
@@ -121,7 +164,7 @@ async def get_dialogs():
             unread=chat.unread_count)
         for chat in dialogs
     ]
-    return templates.get_template("chats.jinja2").render(chats=chats)
+    return templates.get_template("chats.html").render(chats=chats, is_passwd=bool(config.passwd))
 
 ##### / Чат / #####
 
@@ -186,9 +229,9 @@ async def chat(id: str, page: Optional[int] = 0):
                 date=m.date.strftime("%Y-%m-%d %H:%M:%S"),
                 out=m.out
             ))
-        return templates.get_template("chat.jinja2").render(messages=msgs, chat=chat, page=page)
+        return templates.get_template("chat.html").render(messages=msgs, chat=chat, page=page)
     except Exception as ex:
-        return templates.get_template('error.jinja2').render(
+        return templates.get_template('error.html').render(
             error='<br>'.join(ex.args)
         )
 ##### / Реплай / #####
@@ -205,9 +248,9 @@ async def reply_to_msg(id: str, msg_id: int):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        return templates.get_template("reply.jinja2").render(chat=id, id=msg_id)
+        return templates.get_template("reply.html").render(chat=id, id=msg_id)
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
+        return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
 
 ##### / Отправка сообщения / #####
 
@@ -235,9 +278,9 @@ async def send_message(id: str, text: Optional[str] = Form(None), reply_to: Opti
             await user.send_file(chat, f, caption=text, reply_to=reply_to)
         else:
             await user.send_message(chat, text, reply_to=reply_to)
-        return templates.get_template("success.jinja2").render(id=id, text="Сообщение отправлено")
+        return templates.get_template("success.html").render(id=id, text="Сообщение отправлено")
     except Exception as ex:
-        return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
+        return templates.get_template("error.html").render(error='<br>'.join(ex.args))
 
 ##### / Работа с сообщениями / #####
 
@@ -260,10 +303,10 @@ async def edit(id: str, msg_id: int):
         msg = await user.get_messages(id, ids=msg_id)
         if msg:
             msg: types.Message
-            return templates.get_template("edit.jinja2").render(chat=id, id=msg.id, text=msg.text)
-        return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+            return templates.get_template("edit.html").render(chat=id, id=msg.id, text=msg.text)
+        return HTMLResponse(templates.get_template("error.html").render(error="Такого сообщения не существует"))
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
+        return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
 
 
 @app.post(
@@ -285,10 +328,10 @@ async def edit_message(id: str, msg_id: int = Form(...), text: str = Form(...)):
         if msg:
             msg: types.Message
             await msg.edit(text)
-            return templates.get_template("success.jinja2").render(id=id, text="Сообщение изменено")
-        return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+            return templates.get_template("success.html").render(id=id, text="Сообщение изменено")
+        return HTMLResponse(templates.get_template("error.html").render(error="Такого сообщения не существует"))
     except Exception as ex:
-        return templates.get_template("error.jinja2").render(error='<br>'.join(ex.args))
+        return templates.get_template("error.html").render(error='<br>'.join(ex.args))
 
 
 @app.get(
@@ -310,10 +353,10 @@ async def delete_message(id: str, msg_id: int):
         if msg:
             msg: types.Message
             await msg.delete()
-            return templates.get_template("success.jinja2").render(id=id, text="Сообщение удалено")
-        return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+            return templates.get_template("success.html").render(id=id, text="Сообщение удалено")
+        return HTMLResponse(templates.get_template("error.html").render(error="Такого сообщения не существует"))
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
+        return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
 
 ##### / Загрузка и стримминг файла из кеша / #####
 
@@ -334,7 +377,7 @@ async def download(id: str, msg_id: int):
             pass
         msg = await user.get_messages(id, ids=msg_id)
         if not msg or not msg.file:
-            return HTMLResponse(templates.get_template("error.jinja2").render(error="Такого сообщения не существует"))
+            return HTMLResponse(templates.get_template("error.html").render(error="Такого сообщения не существует"))
         msg: types.Message
         if os.path.isdir(f"cache/{id}/{msg_id}") and os.listdir(f"cache/{id}/{msg_id}/") != []:
             file = f"cache/{id}/{msg_id}/" + \
@@ -365,7 +408,7 @@ async def download(id: str, msg_id: int):
         return StreamingResponse(stream, media_type=msg.file.mime_type)
     except Exception as ex:
         return HTMLResponse(
-            templates.get_template('error.jinja2').render(
+            templates.get_template('error.html').render(
                 error='<br>'.join(ex.args)
             )
         )
@@ -396,7 +439,7 @@ async def user_avatar(id: str):
         out.seek(0)
         return StreamingResponse(out)
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
+        return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
 
 
 @app.get(
@@ -416,9 +459,9 @@ async def user_info(id: str):
             pass
         user_ = await user.get_entity(id)
         user_full = await user(functions.users.GetFullUserRequest(id=id))
-        return HTMLResponse(templates.get_template("user.jinja2").render(user=user_, user_full=user_full))
+        return HTMLResponse(templates.get_template("user.html").render(user=user_, user_full=user_full))
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.jinja2").render(error='<br>'.join(ex.args)))
+        return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
 
 ##### / Кеш / #####
 
@@ -433,7 +476,7 @@ async def cache():
         size = utils.humanize(utils.get_size('cache'))
     except:
         size = "0.0B"
-    return templates.get_template("cache.jinja2").render(size=size)
+    return templates.get_template("cache.html").render(size=size)
 
 
 @app.get(

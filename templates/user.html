@@ -11,7 +11,10 @@
         <a href="/user/{{ user.id }}/avatar"><img src="/user/{{ user.id }}/avatar" alt="{{ user.id }}"></a>
     {% endif %}
     <ul>
-        <h4>{{user.first_name}}{%+ if user.last_name %} {{ user.last_name }} {% endif %} {%+ if user.scam %} - [Scam] {% endif %}</h4>
+        <h4>{{user.first_name}}{%+ if user.last_name %} {{ user.last_name }} {% endif %}
+            {%+ if user.scam %} - [Scam] {% endif %}
+            {%+ if user.fake %} - [Fake] {% endif %}
+            {%+ if user.support %} - [Support] {% endif %}</h4>
         <a href="/chat/{{ user.id }}">Написать</a>
         {% if user.phone %}
             <li>Номер: <small>{{ user.phone }}</small></li>
