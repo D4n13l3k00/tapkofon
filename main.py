@@ -93,6 +93,8 @@ async def passwd(password: Optional[str] = None, access_token: Optional[str] = C
             return templates.get_template("pass/pass.html").render()
 
         return HTMLResponse(templates.get_template("pass/pass.html").render(msg="Неверный код/куки"))
+
+
 @app.get(
     "/lock",
     description="Заблокировать",
@@ -102,7 +104,8 @@ async def lock(request: Request):
     r = RedirectResponse('/pass')
     r.delete_cookie('access_token')
     return r
-    
+
+
 @app.get(
     "/auth",
     description="Веб-Авторизация",
