@@ -1,0 +1,11 @@
+name: tapkofon
+services:
+  worker:
+    public: true
+    build: .
+    replicas: 1
+    ports:
+      - 8888
+    resources:
+      cpu: 500m
+      memory: 1Gi
