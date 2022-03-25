@@ -36,9 +36,9 @@ user = TelegramClient(
     config.api_hash
 )
 user.parse_mode = "html"
+
+
 ##### / Работа с подключением / #####
-
-
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     if request.url.path != '/pass':
@@ -84,15 +84,14 @@ async def passwd(password: Optional[str] = None, access_token: Optional[str] = C
         r = RedirectResponse('/')
         r.set_cookie('access_token', config.access_cookie)
         return r
-    if config.passwd:
-        if (password == config.passwd) or (access_token == config.access_cookie):
-            r = RedirectResponse('/')
-            r.set_cookie('access_token', config.access_cookie)
-            return r
-        if not password:
-            return templates.get_template("pass/pass.html").render()
+    if (password == config.passwd) or (access_token == config.access_cookie):
+        r = RedirectResponse('/')
+        r.set_cookie('access_token', config.access_cookie)
+        return r
+    if not password:
+        return templates.get_template("pass/pass.html").render()
 
-        return HTMLResponse(templates.get_template("pass/pass.html").render(msg="Неверный код/куки"))
+    return HTMLResponse(templates.get_template("pass/pass.html").render(msg="Неверный код/куки"))
 
 
 @app.get(
@@ -169,9 +168,8 @@ async def get_dialogs():
     ]
     return templates.get_template("chats.html").render(chats=chats, is_passwd=bool(config.passwd))
 
+
 ##### / Чат / #####
-
-
 @app.get(
     "/chat/{id}",
     description="Чат",
@@ -237,9 +235,9 @@ async def chat(id: str, page: Optional[int] = 0):
         return templates.get_template('error.html').render(
             error='<br>'.join(ex.args)
         )
+
+
 ##### / Реплай / #####
-
-
 @app.get(
     "/chat/{id}/reply/{msg_id}",
     description="Реплай на сообщение",
@@ -255,9 +253,8 @@ async def reply_to_msg(id: str, msg_id: int):
     except Exception as ex:
         return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
 
+
 ##### / Отправка сообщения / #####
-
-
 @app.post(
     "/chat/{id}/send_message",
     description="API Отправка сообщения",
@@ -285,9 +282,8 @@ async def send_message(id: str, text: Optional[str] = Form(None), reply_to: Opti
     except Exception as ex:
         return templates.get_template("error.html").render(error='<br>'.join(ex.args))
 
+
 ##### / Работа с сообщениями / #####
-
-
 @app.get(
     "/chat/{id}/edit/{msg_id}",
     description="Изменить сообщение",
@@ -361,9 +357,8 @@ async def delete_message(id: str, msg_id: int):
     except Exception as ex:
         return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
 
+
 ##### / Загрузка и стримминг файла из кеша / #####
-
-
 @app.get(
     "/chat/{id}/download/{msg_id}",
     description="Загрузка файла"
@@ -395,7 +390,7 @@ async def download(id: str, msg_id: int):
                 m_.name = "audio.wav"
                 AudioSegment.from_file(m_).export(file)
             elif msg.file.mime_type.split("/")[0] == "image":
-                file = f"cache/{id}/{msg_id}/image."+config.pic_format
+                file = f"cache/{id}/{msg_id}/image.{config.pic_format}"
                 m_ = io.BytesIO(await msg.download_media(bytes))
                 m_.name = "pic.png"
                 im = Image.open(m_).convert("RGBA")
@@ -435,14 +430,18 @@ async def user_avatar(id: str):
             pass
         user_ = await user.get_entity(id)
         out = io.BytesIO()
-        out.name = ""+config.pic_format
+        out.name = f"..{config.pic_format}"
         im = Image.open(io.BytesIO(await user.download_profile_photo(user_, bytes)))
         im.thumbnail((config.pic_avatar_max_size,)*2, 1)
         im.save(out, format=config.pic_format)
         out.seek(0)
         return StreamingResponse(out)
     except Exception as ex:
-        return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
+        return HTMLResponse(
+            templates.get_template("error.html").render(
+                error='<br>'.join(ex.args)
+            )
+        )
 
 
 @app.get(
@@ -466,9 +465,8 @@ async def user_info(id: str):
     except Exception as ex:
         return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
 
+
 ##### / Кеш / #####
-
-
 @app.get(
     "/cache",
     description="Кеш",

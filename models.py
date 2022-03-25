@@ -1,25 +1,33 @@
 # Copyright 2021 d4n13l3k00.
 # SPDX-License-Identifier: 	AGPL-3.0-or-later
 
-from pydantic import BaseModel
-from fastapi import File, UploadFile
 from typing import *
+
+from fastapi import File, UploadFile
+from pydantic import BaseModel
+
 
 ##### / Модели данных / #####
 class Chat(BaseModel):
     id: int
     title: str
     unread: int
+
+
 class MessageMedia(BaseModel):
     type: Optional[str] = None
     typ: Optional[str] = None
     filename: Optional[str] = None
     size: Optional[str] = None
+
+
 class ReplyMessage(BaseModel):
     name: str
     text: Optional[str] = None
     id: int
     file: Optional[MessageMedia] = None
+
+
 class Message(BaseModel):
     id: int
     sender: Any

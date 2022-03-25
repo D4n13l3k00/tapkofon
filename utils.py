@@ -36,9 +36,7 @@ class DisplayablePath:
 
     @property
     def displayname(self):
-        if self.path.is_dir():
-            return self.path.name + '/'
-        return self.path.name
+        return f'{self.path.name}/' if self.path.is_dir() else self.path.name
 
     @classmethod
     def make_tree(cls, root, parent=None, is_last=False, criteria=None):
@@ -66,9 +64,7 @@ class DisplayablePath:
 
     @property
     def displayname(self):
-        if self.path.is_dir():
-            return self.path.name + '/'
-        return self.path.name
+        return f'{self.path.name}/' if self.path.is_dir() else self.path.name
 
     def displayable(self):
         if self.parent is None:
@@ -100,7 +96,7 @@ def clear_dir(folder):
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
         except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+            print(f'Failed to delete {file_path}. Reason: {e}')
 
 
 def get_size(start_path='.'):
