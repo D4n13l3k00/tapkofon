@@ -8,7 +8,7 @@ import time
 ### /  Настройки  защиты  / ###
 #    Желательно   изменить    #
 ###############################
-passwd: str or None = '1234'           # ! Код доступа (None - отключить)
+passwd: str or None = None # '1234'   # ! Код доступа (None - отключить)
 access_cookie: str = hashlib.md5(
     str(time.time()).encode()         # ! Куки для доступа
 ).hexdigest()

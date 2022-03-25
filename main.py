@@ -461,7 +461,17 @@ async def user_info(id: str):
             pass
         user_ = await user.get_entity(id)
         user_full = await user(functions.users.GetFullUserRequest(id=id))
-        return HTMLResponse(templates.get_template("user.html").render(user=user_, user_full=user_full))
+        statuses = {
+            types.UserStatusEmpty: 'Ничего',
+            types.UserStatusOnline: 'Онлайн',
+            types.UserStatusOffline: 'Оффлайн',
+            types.UserStatusRecently: 'Недавно',
+            types.UserStatusLastWeek: 'Был на этой неделе',
+            types.UserStatusLastMonth: 'Был в этом месяце',
+        }
+        return HTMLResponse(templates.get_template("user.html").render(
+            user=user_, user_full=user_full,
+            status=statuses[next(filter(lambda x: isinstance(user_.status, x), statuses))]))
     except Exception as ex:
         return HTMLResponse(templates.get_template("error.html").render(error='<br>'.join(ex.args)))
 
