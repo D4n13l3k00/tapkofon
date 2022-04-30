@@ -80,7 +80,8 @@ async def passwd(
         return templates.get_template("pass/pass.html").render()
 
     return HTMLResponse(
-        templates.get_template("pass/pass.html").render(msg="Неверный код/куки")
+        templates.get_template(
+            "pass/pass.html").render(msg="Неверный код/куки")
     )
 
 
@@ -249,7 +250,8 @@ async def reply_to_msg(id: str, msg_id: int):
         return templates.get_template("reply.html").render(chat=id, id=msg_id)
     except Exception as ex:
         return HTMLResponse(
-            templates.get_template("error.html").render(error="<br>".join(ex.args))
+            templates.get_template("error.html").render(
+                error="<br>".join(ex.args))
         )
 
 
@@ -318,7 +320,8 @@ async def edit(id: str, msg_id: int):
         )
     except Exception as ex:
         return HTMLResponse(
-            templates.get_template("error.html").render(error="<br>".join(ex.args))
+            templates.get_template("error.html").render(
+                error="<br>".join(ex.args))
         )
 
 
@@ -382,7 +385,8 @@ async def delete_message(id: str, msg_id: int):
         )
     except Exception as ex:
         return HTMLResponse(
-            templates.get_template("error.html").render(error="<br>".join(ex.args))
+            templates.get_template("error.html").render(
+                error="<br>".join(ex.args))
         )
 
 
@@ -410,7 +414,8 @@ async def download(id: str, msg_id: int):
             os.path.isdir(f"cache/{id}/{msg_id}")
             and os.listdir(f"cache/{id}/{msg_id}/") != []
         ):
-            file = f"cache/{id}/{msg_id}/" + os.listdir(f"cache/{id}/{msg_id}/")[0]
+            file = f"cache/{id}/{msg_id}/" + \
+                os.listdir(f"cache/{id}/{msg_id}/")[0]
         else:
             for i in ["cache/", f"cache/{id}/", f"cache/{id}/{msg_id}/"]:
                 if not os.path.isdir(i):
@@ -437,7 +442,8 @@ async def download(id: str, msg_id: int):
         return StreamingResponse(stream, media_type=msg.file.mime_type)
     except Exception as ex:
         return HTMLResponse(
-            templates.get_template("error.html").render(error="<br>".join(ex.args))
+            templates.get_template("error.html").render(
+                error="<br>".join(ex.args))
         )
 
 
@@ -465,7 +471,8 @@ async def user_avatar(id: str):
         return StreamingResponse(out)
     except Exception as ex:
         return HTMLResponse(
-            templates.get_template("error.html").render(error="<br>".join(ex.args))
+            templates.get_template("error.html").render(
+                error="<br>".join(ex.args))
         )
 
 
@@ -501,7 +508,8 @@ async def user_info(id: str):
         )
     except Exception as ex:
         return HTMLResponse(
-            templates.get_template("error.html").render(error="<br>".join(ex.args))
+            templates.get_template("error.html").render(
+                error="<br>".join(ex.args))
         )
 
 
