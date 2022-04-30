@@ -1,4 +1,4 @@
-# Copyright 2021 d4n13l3k00.
+# Copyright 2022 d4n13l3k00.
 # SPDX-License-Identifier: 	AGPL-3.0-or-later
 
 import hashlib
@@ -10,7 +10,7 @@ import time
 ###############################
 passwd: str or None = None  # '1234'   # ! Код доступа (None - отключить)
 access_cookie: str = hashlib.md5(
-    str(time.time()).encode()         # ! Куки для доступа
+    str(time.time()).encode()  # ! Куки для доступа
 ).hexdigest()
 
 
@@ -38,5 +38,5 @@ msg_regex_to: str = r"/chat/\g<chat>"
 ### / Настройки  Telethon / ###
 #   Изменять не обязательно   #
 ###############################
-api_id: int = 6                                  # ! API_ID
+api_id: int = 6  # ! API_ID
 api_hash: str = "eb06d4abfb49dc3eeb1aeb98ae0f581e"  # ! API_HASH
