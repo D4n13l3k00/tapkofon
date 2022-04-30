@@ -1,6 +1,7 @@
 # Copyright 2022 d4n13l3k00.
 # SPDX-License-Identifier: 	AGPL-3.0-or-later
 
+import contextlib
 import io
 import os
 import sys
@@ -21,7 +22,7 @@ import models
 import utils
 
 if __name__ == "__main__":
-    print("For start: uvicorn main:app --reload")
+    print("For start: uvicorn main:app --host 0.0.0.0 --port 8888")
     sys.exit(0)
 
 templates = Jinja2Templates(directory="templates")
@@ -168,15 +169,14 @@ async def get_dialogs():
 ##### / Чат / #####
 @app.get("/chat/{id}", description="Чат", response_class=HTMLResponse)
 async def chat(id: str, page: Optional[int] = 0):
+    # sourcery skip: avoid-builtin-shadow
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try:
+        with contextlib.suppress(Exception):
             id = int(id)
-        except:
-            pass
         chat = await user.get_entity(id)
         await user.conversation(chat).mark_read()
         messages = await user.get_messages(id, limit=10, add_offset=10 * page)
@@ -264,16 +264,14 @@ async def send_message(
     text: Optional[str] = Form(None),
     reply_to: Optional[int] = Form(None),
     file: Optional[UploadFile] = File(None),
-):
+):  # sourcery skip: avoid-builtin-shadow
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try:
+        with contextlib.suppress(Exception):
             id = int(id)
-        except:
-            pass
         chat = await user.get_entity(id)
         if file and file.file.read():
             file.file.seek(0)
@@ -295,16 +293,14 @@ async def send_message(
     description="Изменить сообщение",
     response_class=HTMLResponse,
 )
-async def edit(id: str, msg_id: int):
+async def edit(id: str, msg_id: int):  # sourcery skip: avoid-builtin-shadow
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try:
+        with contextlib.suppress(Exception):
             id = int(id)
-        except:
-            pass
         msg = await user.get_messages(id, ids=msg_id)
         if msg:
             msg: types.Message
@@ -328,15 +324,14 @@ async def edit(id: str, msg_id: int):
     response_class=HTMLResponse,
 )
 async def edit_message(id: str, msg_id: int = Form(...), text: str = Form(...)):
+    # sourcery skip: avoid-builtin-shadow
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try:
+        with contextlib.suppress(Exception):
             id = int(id)
-        except:
-            pass
         msg = await user.get_messages(id, ids=msg_id)
         if msg:
             msg: types.Message
@@ -364,10 +359,8 @@ async def delete_message(id: str, msg_id: int):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try:
+        with contextlib.suppress(Exception):
             id = int(id)
-        except:
-            pass
         msg = await user.get_messages(id, ids=msg_id)
         if msg:
             msg: types.Message
@@ -394,10 +387,8 @@ async def download(id: str, msg_id: int):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try:
+        with contextlib.suppress(Exception):
             id = int(id)
-        except:
-            pass
         msg = await user.get_messages(id, ids=msg_id)
         if not msg or not msg.file:
             return HTMLResponse(
@@ -445,16 +436,14 @@ async def download(id: str, msg_id: int):
 
 
 @app.get("/user/{id}/avatar", description="Аватарка пользователя")
-async def user_avatar(id: str):
+async def user_avatar(id: str):  # sourcery skip: avoid-builtin-shadow
     if not user.is_connected():
         await user.connect()
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try:
+        with contextlib.suppress(Exception):
             id = int(id)
-        except:
-            pass
         user_ = await user.get_entity(id)
         out = io.BytesIO()
         out.name = f"..{config.pic_format}"
@@ -476,10 +465,8 @@ async def user_info(id: str):
     if not await user.is_user_authorized():
         return templates.get_template("auth/not_authorized.html").render()
     try:
-        try:
+        with contextlib.suppress(Exception):
             id = int(id)
-        except:
-            pass
         user_ = await user.get_entity(id)
         user_full = await user(functions.users.GetFullUserRequest(id=id))
         statuses = {
@@ -510,24 +497,22 @@ async def user_info(id: str):
 async def cache():
     try:
         size = utils.humanize(utils.get_size("cache"))
-    except:
+    except Exception:
         size = "0.0B"
     return templates.get_template("cache.html").render(size=size)
 
 
 @app.get("/cache/clear", description="Очистить кеш", response_class=HTMLResponse)
 async def cache_clear():
-    try:
+    with contextlib.suppress(Exception):
         utils.clear_dir("cache")
-    except:
-        pass
     return RedirectResponse("/cache")
 
 
 @app.get("/cache/list", description="Дерево кеша", response_class=HTMLResponse)
 async def cache_list():
     if not os.path.isdir("cache") or os.listdir("cache") == []:
-        return "Cache is empty"
+        return "Кеш пустой"
     paths = utils.DisplayablePath.make_tree(Path("cache"))
     var = "".join(path.displayable() + "\n" for path in paths)
     return var.replace("\n", "<br>").replace(" ", " ")
