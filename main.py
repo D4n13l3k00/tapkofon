@@ -16,7 +16,7 @@ from fastapi.responses import (
     HTMLResponse,
     RedirectResponse,
     StreamingResponse,
-    )
+)
 from fastapi.templating import Jinja2Templates
 from PIL import Image
 from pydub import AudioSegment
