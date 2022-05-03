@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: 	AGPL-3.0-or-later
 
 from typing import *
-
-from fastapi import File, UploadFile
 from pydantic import BaseModel
 
 
