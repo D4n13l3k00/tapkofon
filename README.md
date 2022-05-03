@@ -3,10 +3,12 @@
 
 # 👞 Tapkofon
 ![Telegram](https://img.shields.io/badge/Telegram-blue?style=flat&logo=telegram)
-[![DeepSource](https://deepsource.io/gh/D4n13l3k00/tapkofon.svg/?label=resolved+issues)](https://deepsource.io/gh/D4n13l3k00/tapkofon/?ref=repository-badge)
 ![CodeStyle](https://img.shields.io/badge/code%20style-black-black)
 ![GitHub contributors](https://img.shields.io/github/contributors/D4n13l3k00/tapkofon)
 ![GitHub](https://img.shields.io/github/license/D4n13l3k00/tapkofon)
+
+[![DeepSource](https://deepsource.io/gh/D4n13l3k00/tapkofon.svg/?label=active+issues&token=zBpkbE5y6_lXYxJ6RtPVrJQ1)](https://deepsource.io/gh/D4n13l3k00/tapkofon/?ref=repository-badge)
+[![DeepSource](https://deepsource.io/gh/D4n13l3k00/tapkofon.svg/?label=resolved+issues&token=zBpkbE5y6_lXYxJ6RtPVrJQ1)](https://deepsource.io/gh/D4n13l3k00/tapkofon/?ref=repository-badge)
 
 </div>
 
@@ -60,13 +62,13 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ### 💖 Фишки
 
-- Пароль доступа (cookie) ([config.py](/config.py)). Пароль по умолчанию выключен, но вы можете его включить в конфиге.
+- Пароль доступа (cookie) ([config.py](/config.py#L11)). Пароль по умолчанию выключен, но вы можете его включить в конфиге.
 - Система кэша (при загрузке файла он скачивается на сервер в кэш директорию, и оттуда отправляется вам)
 - Конвертирование не mp3 аудио в mp3 для лучшей совместимости
 - Распознавание речи в голосовых сообщениях
-- Подгонка фото под определённый размер и сжатие([config.py](/config.py)) для лучшей совместимости
+- Подгонка фото под определённый размер и сжатие([config.py](/config.py#L21)) для лучшей совместимости
 - Смайлики в сообщениях превращаются в текст (тапики не поддерживают соверменные юникод смайлики)
-- Возможность просмотра профиля пользователя(аватарка, юзерка , био)
+- Возможность просмотра профиля пользователя (аватарка, юзерка , био)
 
 ### 😢 Баги
 
