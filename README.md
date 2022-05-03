@@ -1,4 +1,15 @@
+
+<div align="center">
+
 # Tapkofon
+![Telegram](https://img.shields.io/badge/Telegram-blue?style=flat&logo=telegram)
+![PythonVersions](https://img.shields.io/pypi/pyversions/telethon)
+[![DeepSource](https://deepsource.io/gh/D4n13l3k00/tapkofon.svg/?label=resolved+issues)](https://deepsource.io/gh/D4n13l3k00/tapkofon/?ref=repository-badge)
+![CodeStyle](https://img.shields.io/badge/code%20style-black-black)
+
+
+</div>
+
 
 ### Представляю вам свой мини-проект Tapkofon - минималистичный веб-клиент Telegram'а на Telethon, FastAPI, сделанный преимущественно для кнопочных телефонов
 
@@ -43,6 +54,7 @@
 - Пароль доступа (cookie) ([config.py](/config.py)). Пароль по умолчанию - 1234
 - Система кэша (при загрузке файла он скачивается на сервер в кэш директорию, и оттуда отправляется вам)
 - Конвертирование не mp3 аудио в mp3 для лучшей совместимости
+- Распознавание речи в голосовых сообщениях
 - Подгонка фото под определённый размер и сжатие([config.py](/config.py)) для лучшей совместимости
 - Смайлики в сообщениях превращаются в текст (тапики не поддерживают соверменные юникод смайлики)
 - Возможность просмотра профиля пользователя(аватарка, юзерка , био)

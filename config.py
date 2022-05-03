@@ -33,10 +33,12 @@ msg_regex_tme: bool = True
 msg_replace_regex: str = r"(https?://)?t\.me/(?P<chat>[A-Za-z0-9-_]{3,20})/?\d*"
 # ? Замена на локал. ссылки
 msg_regex_to: str = r"/chat/\g<chat>"
+# ? Язык распознавания речи
+recognize_lang = "ru-RU"
 
 ###############################
 ### / Настройки  Telethon / ###
 #   Изменять не обязательно   #
 ###############################
-api_id: int = 6  # ! API_ID
-api_hash: str = "eb06d4abfb49dc3eeb1aeb98ae0f581e"  # ! API_HASH
+api_id: int = 8  # ! API_ID
+api_hash: str = "7245de8e747a0d6fbe11f7cc14fcc0bb"  # ! API_HASH

@@ -10,8 +10,14 @@ import traceback
 from pathlib import Path
 from typing import *
 
+import speech_recognition as sr
 from fastapi import Cookie, FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import (
+    HTMLResponse,
+    RedirectResponse,
+    StreamingResponse,
+    PlainTextResponse,
+)
 from fastapi.templating import Jinja2Templates
 from PIL import Image
 from pydub import AudioSegment
@@ -426,6 +432,61 @@ async def download(id: str, msg_id: int):
                 file = await msg.download_media(path)
         stream = open(file, mode="rb")
         return StreamingResponse(stream, media_type=msg.file.mime_type)
+    except Exception as ex:
+        return HTMLResponse(
+            templates.get_template("error.html").render(error="<br>".join(ex.args))
+        )
+
+
+@app.get("/chat/{id}/recognize/{msg_id}", description="Загрузка файла")
+async def recognize(id: str, msg_id: int):  # sourcery skip: avoid-builtin-shadow
+    if not user.is_connected():
+        await user.connect()
+    if not await user.is_user_authorized():
+        return templates.get_template("auth/not_authorized.html").render()
+    try:
+        with contextlib.suppress(Exception):
+            id = int(id)
+        msg = await user.get_messages(id, ids=msg_id)
+        if not msg or not msg.file:
+            return HTMLResponse(
+                templates.get_template("error.html").render(
+                    error="Такого сообщения не существует"
+                )
+            )
+        msg: types.Message
+        if (
+            os.path.isdir(f"cache/{id}/{msg_id}")
+            and os.listdir(f"cache/{id}/{msg_id}/") != []
+        ):
+            file = f"cache/{id}/{msg_id}/" + os.listdir(f"cache/{id}/{msg_id}/")[0]
+        else:
+            for i in ["cache/", f"cache/{id}/", f"cache/{id}/{msg_id}/"]:
+                if not os.path.isdir(i):
+                    os.mkdir(i)
+            if msg.file.mime_type.split("/")[0] == "audio" and msg.file.ext != ".mp3":
+                file = f"cache/{id}/{msg_id}/audio.mp3"
+                m_ = io.BytesIO(await msg.download_media(bytes))
+                m_.name = "audio.wav"
+                AudioSegment.from_file(m_).export(file)
+            else:
+                path = f"cache/{id}/{msg_id}/{msg.file.name}"
+                file = await msg.download_media(path)
+        if not os.path.isfile(f"{file}.wav"):
+            song = AudioSegment.from_file(file)
+            song.export(f"{file}.wav", format="wav")
+        r = sr.Recognizer()
+        with sr.AudioFile(f"{file}.wav") as source:
+            audio_data = r.record(source)
+            text = r.recognize_google(audio_data, language=config.recognize_lang)
+
+        r = sr.Recognizer()
+        with sr.AudioFile(f"{file}.wav") as source:
+            audio_data = r.record(source)
+            text = r.recognize_google(audio_data, language="ru-RU")
+        return HTMLResponse(
+            templates.get_template("voice_recognized.html").render(id=id, text=text)
+        )
     except Exception as ex:
         return HTMLResponse(
             templates.get_template("error.html").render(error="<br>".join(ex.args))
