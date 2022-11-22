@@ -1,6 +1,6 @@
 emoji==1.7.0
 fastapi==0.78.0
-Pillow==9.1.1
+Pillow==9.3.0
 pydantic==1.9.0
 pydub==0.25.1
 SpeechRecognition==3.8.1
