@@ -39,6 +39,16 @@
 - Не работает авторизация при включённом облачном пароле (только в вебе)
 - Если найдешь баг, [пиши сюда](https://t.me/D4n13l3k00)
 
+## 🔝 Быстрый старт
+
+```bash
+git clone https://github.com/D4n13l3k00/tapkofon
+cd tapkofon
+apt install python3 python3-venv python3-pip python3-setuptools ffmpeg -y
+chmod +x *.sh
+./local_deploy.sh
+./run.sh
+```
 
 ## 🔻 Установка
 
@@ -77,8 +87,18 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 Билд: `docker build -t tapik .`
 
-Создаём volume для сохранения сессии: `docker volume create tapik`
+Создаём volume для сохранения сессии: `docker volume create tapik-session`
 
-Запуск: `docker run -itd -p 8888:8888 -v tapik:/root tapik`
+Запуск: `docker run -itd -p 8888:8888 -v tapik-session:/root/session tapik`
 
-Так же доступен деплой на [Okteto](https://cloud.okteto.com/#/deploy?repository=https://github.com/D4n13l3k00/tapkofon)
+Можно использовать docker-compose: `docker-compose up -d`
+
+P.S: доступен деплой на [Okteto](https://cloud.okteto.com/#/deploy?repository=https://github.com/D4n13l3k00/tapkofon)
+
+### P.S 🤫
+
+Для корректной работы необходимо установить свои `api_id` и `api_hash` в `config.toml` (генерируется при запуске в папке session)
+
+Из-за этого может не приходить код для авторизации (проверено лично)
+
+Получить их можно [здесь](https://my.telegram.org/apps)

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: 	AGPL-3.0-or-later
 
 import contextlib
+import hashlib
 import io
 import os
 import sys
@@ -10,21 +11,23 @@ import traceback
 from pathlib import Path
 from typing import *
 
+import config
+import models
 import speech_recognition as sr
+import utils
 from fastapi import Cookie, FastAPI, File, Form, Request, UploadFile
-from fastapi.responses import (
-    HTMLResponse,
-    RedirectResponse,
-    StreamingResponse,
-)
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from PIL import Image
 from pydub import AudioSegment
 from telethon import TelegramClient, errors, functions, types
 
-import config
-import models
-import utils
+config = config.Config()
+config.access_cookie = (
+    hashlib.sha256(os.urandom(32)).hexdigest()
+    if not hasattr(config, "access_cookie")
+    else config.access_cookie
+)
 
 if __name__ == "__main__":
     print("For start: uvicorn main:app --host 0.0.0.0 --port 8888")
@@ -33,9 +36,10 @@ if __name__ == "__main__":
 templates = Jinja2Templates(directory="templates")
 
 app = FastAPI(title="Tapkofon API", version="1.0")
-user = TelegramClient("session", config.api_id, config.api_hash)
+if (path := (Path.cwd().parent / "session")) and not path.exists():
+    path.mkdir(parents=True)
+user = TelegramClient("../session/session", config.api_id, config.api_hash)
 user.parse_mode = "html"
-
 
 ##### / Работа с подключением / #####
 @app.middleware("http")
@@ -91,7 +95,7 @@ async def passwd(
 
 
 @app.get("/lock", description="Заблокировать", response_class=HTMLResponse)
-async def lock(request: Request):
+async def lock():
     r = RedirectResponse("/pass")
     r.delete_cookie("access_token")
     return r
@@ -576,3 +580,8 @@ async def cache_list():
     paths = utils.DisplayablePath.make_tree(Path("cache"))
     var = "".join(path.displayable() + "\n" for path in paths)
     return var.replace("\n", "<br>").replace(" ", " ")
+
+
+@app.get("/about", description="О проекте", response_class=HTMLResponse)
+async def about():
+    return templates.get_template("about.html").render()

@@ -6,9 +6,10 @@ import re
 import shutil
 from pathlib import Path
 
+import config
 import emoji
 
-import config
+config = config.Config()
 
 
 def replacing_text(text: str):
