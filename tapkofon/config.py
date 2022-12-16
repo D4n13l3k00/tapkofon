@@ -23,13 +23,12 @@ class Config:
         }
 
         self.config = self.default_config
-
-        if not Path(self.config_path).exists():
-            with self.config_path.open("w") as f:
-                toml.dump(self.default_config, f)
-        else:
+        try:
             with self.config_path.open("r") as f:
-                self.config = toml.load(f)
+                self.config.update(toml.load(f))
+        except FileNotFoundError:
+            with self.config_path.open("w") as f:
+                toml.dump(self.config, f)
 
         for key, value in self.config.items():
             if key in self.config:

@@ -126,7 +126,7 @@ async def auth(
             )
     try:
         if tfa:
-            await user.sign_in(password=tfa)
+            await user.sign_in(phone, password=tfa)
         else:
             await user.sign_in(code=code)
         await user.sign_in(phone)

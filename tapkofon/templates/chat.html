@@ -11,70 +11,74 @@
     <button type="submit">»</button>
 </form>
 {% if page == 0 %}
-<a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
+    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
 {% elif page > 0 %}
-<a href="/chat/{{ chat.id }}">К началу</a> <a href="/chat/{{ chat.id }}?page={{ page-1 }}">«-</a> <a
-    href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
+    <a href="/chat/{{ chat.id }}">К началу</a>
+    <a href="/chat/{{ chat.id }}?page={{ page-1 }}">«-</a>
+    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
 {% endif %}
 {% if messages %}
-{% for m in messages %}
-<hr>
-{% if m.mentioned %}
-<small><strong>Вас тегнул</strong></small>
-{% endif %}
-<strong><a href="/user/{{ m.sender.id }}">{{ m.sender.first_name or m.sender.title }}</a></strong>
-{% if m.reply %}
-<br>
-<p>
-    <strong>Отв к</strong> {{ m.reply.name }} <br>
-    {% if m.reply.file %}
-    <br>
-    {% if m.reply.file.typ == "image" %}
-    <a href="/chat/{{ chat.id }}/download/{{ m.reply.id }}"><img src="/chat/{{ chat.id }}/download/{{ m.reply.id }}"
-            alt="Фото {{ m.reply.id }}"></a>
-    {% else %}
-    <a href="/chat/{{ chat.id }}/download/{{ m.reply.id }}">[Файл {{ m.reply.file.filename }} ({{ m.reply.file.size }} |
-        {{ m.reply.file.type }})]</a>
-    {% endif %}
-    {% endif %}
-    {% if m.reply.text %}
-    <br>
-    <small>{{ m.reply.text|safe }}</small>
-    {% endif %}
-</p>
-<p>------------</p>
-{% endif %}
-{% if m.file %}
-<br>
-{% if m.file.typ == "image" %}
-<a href="/chat/{{ chat.id }}/download/{{ m.id }}"><img src="/chat/{{ chat.id }}/download/{{ m.id }}"
-        alt="Фото {{ m.id }}"></a>
-{% elif m.file.type == "audio/ogg" %}
-<a href="/chat/{{ chat.id }}/recognize/{{ m.id }}">Войс [rc]</a>
-<a href="/chat/{{ chat.id }}/download/{{ m.id }}">Войс [dl]</a>
+    {% for m in messages %}
+        <hr>
+        {% if m.mentioned %}
+            <small><strong>Вас тегнул</strong></small>
+        {% endif %}
+            <strong><a href="/user/{{ m.sender.id }}">{{ m.sender.first_name or m.sender.title }}</a></strong>
+        {% if m.reply %}
+        <br>
+        <p>
+            <strong>Отв к</strong> {{ m.reply.name }} <br>
+            {% if m.reply.file %}
+                <br>
+                {% if m.reply.file.typ == "image" %}
+                    <a href="/chat/{{ chat.id }}/download/{{ m.reply.id }}">
+                        <img src="/chat/{{ chat.id }}/download/{{ m.reply.id }}" alt="Фото {{ m.reply.id }}">
+                    </a>
+                {% else %}
+                    <a href="/chat/{{ chat.id }}/download/{{ m.reply.id }}">
+                        [Файл {{ m.reply.file.filename }} ({{ m.reply.file.size }} | {{ m.reply.file.type }})]
+                    </a>
+                {% endif %}
+            {% endif %}
+            {% if m.reply.text %}
+                <br>
+                <small>{{ m.reply.text|safe }}</small>
+            {% endif %}
+        </p>
+        <p>------------</p>
+        {% endif %}
+        {% if m.file %}
+            <br>
+            {% if m.file.typ == "image" %}
+                <a href="/chat/{{ chat.id }}/download/{{ m.id }}"><img src="/chat/{{ chat.id }}/download/{{ m.id }}"
+                    alt="Фото {{ m.id }}"></a>
+            {% elif m.file.type == "audio/ogg" %}
+                <a href="/chat/{{ chat.id }}/recognize/{{ m.id }}">Войс [rc]</a>
+                <a href="/chat/{{ chat.id }}/download/{{ m.id }}">Войс [dl]</a>
+            {% else %}
+                <a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Файл {{ m.file.filename }} ({{ m.file.size }} | {{ m.file.type
+                }})]</a>
+            {% endif %}
+            <br>
+        {% endif %}
+        {% if m.text %}
+            <p>{{ m.text|safe }}</p>
+        {% endif %}
+            <small>{{ m.date }}</small>
+            <a href="/chat/{{ chat.id }}/reply/{{ m.id }}">Отв</a>
+            <a href="/chat/{{ chat.id }}/delete/{{ m.id }}">Удал</a>
+        {% if m.out %}
+            <a href="/chat/{{ chat.id }}/edit/{{ m.id }}">Измен</a>
+        {% endif %}
+    {% endfor %}
 {% else %}
-<a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Файл {{ m.file.filename }} ({{ m.file.size }} | {{ m.file.type
-    }})]</a>
-{% endif %}
-<br>
-{% endif %}
-{% if m.text %}
-<p>{{ m.text|safe }}</p>
-{% endif %}
-<small>{{ m.date }}</small>
-<a href="/chat/{{ chat.id }}/reply/{{ m.id }}">Отв</a>
-<a href="/chat/{{ chat.id }}/delete/{{ m.id }}">Удал</a>
-{% if m.out %}
-<a href="/chat/{{ chat.id }}/edit/{{ m.id }}">Измен</a>
-{% endif %}
-{% endfor %}
-{% else %}
-<p>Сообщение пока нет...</p>
+    <p>Сообщение пока нет...</p>
 {% endif %}
 <hr>
 {% if page == 0 %}
-<a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
+    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
 {% elif page > 0 %}
-<a href="/chat/{{ chat.id }}">К началу</a> <a href="/chat/{{ chat.id }}?page={{ page-1 }}">«-</a> <a
-    href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
+    <a href="/chat/{{ chat.id }}">К началу</a>
+    <a href="/chat/{{ chat.id }}?page={{ page-1 }}">«-</a>
+    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
 {% endif %}
