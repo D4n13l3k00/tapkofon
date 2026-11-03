@@ -1,19 +1,24 @@
-<!--
- Copyright 2022 d4n13l3k00.
- SPDX-License-Identifier: 	AGPL-3.0-or-later
--->
-
-{% if msg %}
-    <p>{{ msg }}</p>
+{% extends "base.html" %}
+{% block title %}Вход · Тапкофон{% endblock %}
+{% block content %}
+<h1>Вход в Telegram</h1>
+<p><a href="/auth/qr">Войти по QR-коду</a></p>
+<p class="muted">{% if step == "phone" %}Шаг 1: номер{% elif step == "code" %}Шаг 2: код{% else %}Шаг 3: облачный пароль{% endif %}</p>
+{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+<form action="/auth" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="step" value="{{ step }}">
+{% if step == "phone" %}
+<label for="phone">Номер с кодом страны</label><input id="phone" type="tel" name="phone" size="18" value="{{ phone }}" autocomplete="tel">
+<p class="muted">Например: +79991234567</p><button type="submit">Получить код</button>
+{% elif step == "code" %}
+<input type="hidden" name="phone" value="{{ phone }}"><p>{{ phone }}</p>
+<label for="code">Код входа</label><input id="code" type="text" name="code" size="10" inputmode="numeric" autocomplete="one-time-code">
+<button type="submit">Подтвердить код</button>
+{% else %}
+<input type="hidden" name="phone" value="{{ phone }}"><p>{{ phone }}</p>
+<label for="tfa">Облачный пароль</label><input id="tfa" type="password" name="tfa" size="18" autocomplete="off">
+<button type="submit">Войти</button>
 {% endif %}
-<form action="/auth" method="get">
-    <p>Номер телефона</p>
-    <input type="text" name="phone" value="{{ phone }}">
-    <p>Код</p>
-    <input type="text" name="code" value="{{ code }}">
-    <p>2fa пароль (если есть)</p>
-    <input type="text" name="tfa">
-    <p></p>
-    <button type="submit">Авторизоваться</button>
 </form>
-<p><a href="/logout">Выйти из аккаунта</a></p>
+{% if step != "phone" %}<p><a href="/auth?restart=1">Запросить новый код или сменить номер</a></p>{% endif %}
+{% endblock %}

@@ -1,12 +1,1 @@
-<!--
- Copyright 2022 d4n13l3k00.
- SPDX-License-Identifier: 	AGPL-3.0-or-later
--->
-
-<h5>Изменить сообщение {{ id }}</h5>
-<form enctype="multipart/form-data" action="/chat/{{ chat }}/edit_message" method="post">
-    <input type="text" name="text" placeholder="Введите текст..." value="{{ text }}">
-    <input type="hidden" name="msg_id" value="{{ id }}">
-    <button type="submit">»</button>
-</form>
-<a href="/chat/{{ chat }}">Назад в чат</a>
+{% extends "base.html" %}{% block content %}<h1>Изменить сообщение</h1><form action="/chat/{{ chat }}/edit_message" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="msg_id" value="{{ id }}"><label for="text">Текст</label><textarea id="text" name="text" rows="5" cols="18">{{ text }}</textarea><button type="submit">Сохранить изменения</button></form><p><a href="/chat/{{ chat }}">Отмена</a></p>{% endblock %}

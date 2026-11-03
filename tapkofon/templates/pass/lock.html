@@ -1,0 +1,1 @@
+{% extends "base.html" %}{% block content %}<h1>Заблокировать доступ?</h1><form action="/lock" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Заблокировать</button></form><p><a href="/">Отмена</a></p>{% endblock %}

@@ -1,9 +1,1 @@
-<!--
- Copyright 2022 d4n13l3k00.
- SPDX-License-Identifier: 	AGPL-3.0-or-later
--->
-
-<p>Вы деавторизованы</p>
-<a href="/auth">Авторизоваться </a>
-<br>
-<a href="/auth_old">Авторизоваться (с терминала)</a>
+{% extends "base.html" %}{% block content %}<h1>Вы вышли из Telegram</h1><p><a href="/auth">Войти снова</a></p>{% endblock %}

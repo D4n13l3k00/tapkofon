@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Вложение · Тапкофон{% endblock %}
+{% block content %}
+<h1>{% if media.typ == "image" %}Фото{% elif media.typ == "audio" %}Аудио{% else %}Файл{% endif %}</h1>
+<p><a href="/chat/{{ chat_id }}">Назад в чат</a></p>
+<p>Оригинал: {{ media.size }}{% if media.filename %} · {{ media.filename }}{% endif %}</p>
+{% if media.typ == "image" %}
+<p><img src="/chat/{{ chat_id }}/download/{{ id }}" width="{{ 128 if prefs.simple_html else prefs.image_size }}" alt="Фото"></p>
+<p><a href="/chat/{{ chat_id }}/download/{{ id }}">Скачать миниатюру {{ prefs.image_size }} пикселей</a></p>
+<p><a href="/chat/{{ chat_id }}/download/{{ id }}?variant=full">Открыть оригинал</a></p>
+{% elif media.typ == "audio" %}
+<p><a href="/chat/{{ chat_id }}/download/{{ id }}?variant=voice">Скачать компактный MP3 (моно, 32 кбит/с)</a></p>
+<p><a href="/chat/{{ chat_id }}/download/{{ id }}">Скачать обычный MP3</a></p>
+<p><a href="/chat/{{ chat_id }}/download/{{ id }}?variant=full">Скачать оригинал</a></p>
+{% if shared.recognize_enabled %}<p><a href="/chat/{{ chat_id }}/recognize/{{ id }}">Распознать речь</a></p>
+<p class="muted">При распознавании звук передаётся в Google.</p>{% endif %}
+{% else %}<p><a href="/chat/{{ chat_id }}/download/{{ id }}">Скачать файл</a></p>{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Тапкофон{% endblock %}</title>
+{% if not prefs.simple_html %}<style>
+body{margin:0 auto;max-width:28em;background:#fff;color:#182b3a;font:16px Arial,sans-serif;line-height:1.35}a{color:#164c73;text-decoration:underline}a:focus,button:focus,input:focus,textarea:focus,select:focus{outline:2px solid #bc8200;background:#fff3c7;color:#182b3a}.brand{padding:.35em .5em;background:#164c73;color:#fff;font-weight:bold}.brand a{color:#fff}.brand a:focus{color:#182b3a}.body{padding:.5em;word-wrap:break-word}h1{font-size:1.15em;margin:.3em 0 .6em}h2{font-size:1em;margin:.4em 0}p{margin:.5em 0}.nav{margin:.6em 0;padding:.35em 0;border-top:1px solid #b6cbd9;border-bottom:1px solid #b6cbd9}.nav a{margin-right:.5em}.item{padding:.5em 0;border-bottom:1px solid #b6cbd9}.muted{color:#526674;font-size:.85em}.notice{padding:.4em;background:#eaf3fa;border-left:3px solid #286d94}label{display:block;margin-top:.5em}input[type=text],input[type=tel],input[type=password],textarea,select{width:100%;max-width:100%;box-sizing:border-box;font:inherit;border:1px solid #8299a8;padding:.3em}input[type=file]{max-width:100%;font:inherit}textarea{height:6em}button{font:inherit;padding:.3em .5em;margin:.3em .3em .3em 0;background:#eaf3fa;color:#182b3a;border:1px solid #8299a8}img{max-width:100%;height:auto;border:0}pre{white-space:pre-wrap;word-wrap:break-word;font-size:.85em}.text{word-wrap:break-word}ul{padding-left:1.2em}.footer{margin-top:.8em;padding:.4em .5em;background:#eaf3fa;font-size:.85em}
+</style>{% endif %}
+</head>
+<body>
+<div class="brand"><a href="/">Тапкофон</a></div>
+<div class="body">
+{% block content %}{% endblock %}
+</div>
+<div class="footer"><a href="/">Чаты</a> · <a href="/settings">Настройки</a> · <a href="/about">О проекте</a></div>
+</body>
+</html>

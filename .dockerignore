@@ -1,0 +1,17 @@
+.git
+.venv
+.env
+session
+**/config.toml
+**/*.sqlite3
+**/*.sqlite3-*
+**/*.session*
+**/cache/
+cache
+__pycache__
+*.session*
+.pytest_cache
+.ruff_cache
+dist
+tests
+.vscode

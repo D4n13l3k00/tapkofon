@@ -1,0 +1,1 @@
+{% extends "base.html" %}{% block content %}<h1>Выйти из Telegram?</h1><form action="/logout" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Выйти</button></form><p><a href="/">Отмена</a></p>{% endblock %}

@@ -2,14 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: FastAPI",
-            "type": "python",
+            "name": "Tapkofon: FastAPI",
+            "type": "debugpy",
             "request": "launch",
-            "module": "uvicorn",
-            "args": [
-                "main:app",
-                "--reload"
-            ],
+            "module": "tapkofon",
+            "args": ["serve", "--reload", "--port", "8888"],
+            "cwd": "${workspaceFolder}",
             "jinja": true
         }
     ]

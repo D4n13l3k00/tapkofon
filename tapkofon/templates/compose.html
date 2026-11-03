@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Написать · Тапкофон{% endblock %}
+{% block content %}
+<h1>{% if reply_to %}Ответ на сообщение {{ reply_to }}{% else %}Написать сообщение{% endif %}</h1>
+<p><a href="/chat/{{ chat_id }}">Назад в чат</a></p>
+{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+<form{% if attachment %} enctype="multipart/form-data"{% endif %} action="/chat/{{ chat_id }}/send_message" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+{% if reply_to %}<input type="hidden" name="reply_to" value="{{ reply_to }}">{% endif %}
+<label for="text">Текст</label><textarea id="text" name="text" rows="5" cols="16">{{ text }}</textarea>
+{% if attachment %}<input type="hidden" name="attachment_mode" value="true"><label for="file">Файл</label><input id="file" type="file" name="file" size="12">{% else %}<p><button type="submit" name="action" value="attach">Прикрепить файл</button></p>{% endif %}
+<p><button type="submit" name="action" value="send">Отправить</button><button type="submit" name="action" value="draft">Сохранить черновик</button></p>
+<label for="quick">Быстрый ответ</label><select id="quick" name="quick_reply">{% for reply in quick_replies %}<option value="{{ reply }}">{{ reply }}</option>{% endfor %}</select>
+<button type="submit" name="action" value="insert">Добавить в текст</button>
+</form>
+<p class="muted">Черновик сохраняет только текст. После ошибки файл нужно выбрать заново.</p>
+{% endblock %}

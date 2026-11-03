@@ -1,0 +1,1 @@
+{% extends "base.html" %}{% block content %}<h1>Удалить сообщение {{ id }}?</h1><form action="/chat/{{ chat }}/delete/{{ id }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Удалить</button></form><p><a href="/chat/{{ chat }}">Отмена</a></p>{% endblock %}

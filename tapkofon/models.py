@@ -1,38 +1,41 @@
 # Copyright 2022 d4n13l3k00.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
-from typing import *
-
-from pydantic import BaseModel
+# SPDX-License-Identifier: AGPL-3.0-or-later
+from dataclasses import dataclass
+from typing import Any
 
 
-##### / Модели данных / #####
-class Chat(BaseModel):
+@dataclass
+class Chat:
     id: int
     title: str
     unread: int
 
 
-class MessageMedia(BaseModel):
-    type: Optional[str] = None
-    typ: Optional[str] = None
-    filename: Optional[str] = None
-    size: Optional[str] = None
+@dataclass
+class MessageMedia:
+    type: str
+    typ: str
+    size: str
+    filename: str | None = None
 
 
-class ReplyMessage(BaseModel):
+@dataclass
+class ReplyMessage:
     name: str
-    text: Optional[str] = None
     id: int
-    file: Optional[MessageMedia] = None
+    file: MessageMedia | None = None
+    text: str | None = None
+    truncated: bool = False
 
 
-class Message(BaseModel):
+@dataclass
+class Message:
     id: int
     sender: Any
-    text: Optional[str] = None
-    file: Optional[MessageMedia] = None
-    reply: Optional[ReplyMessage] = None
+    text: str | None
+    file: MessageMedia | None
+    reply: ReplyMessage | None
     mentioned: bool
     date: str
     out: bool
+    truncated: bool = False
