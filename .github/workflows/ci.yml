@@ -1,0 +1,55 @@
+name: Checks
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.12", "3.13", "3.14"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.12.24"
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg --no-progress -y
+      - run: uv sync --locked
+      - run: uv run --locked tortoise makemigrations
+      - name: Ensure migrations match models
+        run: uv run --locked python -c "import subprocess; assert not subprocess.check_output(['git', 'status', '--porcelain', '--', 'tapkofon/migrations']).strip(), 'Missing or modified migrations'"
+      - run: uv run --locked ruff check .
+      - run: uv run --locked ruff format --check .
+      - run: uv run --locked pyright
+      - run: uv run --locked pytest -q
+      - run: uv build
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: docker build -t tapkofon:test .
+      - name: Check container startup
+        run: |
+          docker run -d --name tapkofon-test -p 127.0.0.1:8888:8888 tapkofon:test
+          for attempt in $(seq 1 30); do
+            if curl --fail http://127.0.0.1:8888/health; then exit 0; fi
+            sleep 1
+          done
+          docker logs tapkofon-test
+          exit 1
+      - name: Remove test container
+        if: always()
+        run: docker rm -f tapkofon-test

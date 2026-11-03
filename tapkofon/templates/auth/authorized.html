@@ -1,11 +1,1 @@
-<!--
- Copyright 2022 d4n13l3k00.
- SPDX-License-Identifier: 	AGPL-3.0-or-later
--->
-
-<p>
-    Авторизован как {{ me.first_name }}<br>
-    ID: {{ me.id }}
-</p>
-
-<a href="/">К чатам</a>
+{% extends "base.html" %}{% block content %}<h1>Вход выполнен</h1><p>{{ me.first_name }} · ID {{ me.id }}</p><p><a href="/">Открыть чаты</a></p>{% endblock %}

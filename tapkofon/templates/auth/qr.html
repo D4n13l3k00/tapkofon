@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Вход по QR · Тапкофон{% endblock %}
+{% block content %}
+<h1>Вход по QR</h1>
+{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+{% if challenge and challenge.status == "waiting" %}
+<p>На другом устройстве откройте Telegram: Настройки → Устройства → Подключить устройство.</p>
+<p><img src="/auth/qr/image?v={{ challenge.public_id }}" width="{{ 128 if prefs.simple_html else 176 }}" alt="QR-код входа"></p>
+<p><a href="/auth/qr/image?v={{ challenge.public_id }}">Открыть QR крупнее</a></p>
+<form action="/auth/qr/check" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Я отсканировал — проверить</button></form>
+<p class="muted">Код действует недолго. Если срок истёк, создайте новый.</p>
+{% elif challenge and challenge.status == "password" %}
+<p>QR подтверждён. Telegram запрашивает облачный пароль.</p>
+<form action="/auth/qr/password" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label for="tfa">Облачный пароль</label><input type="password" id="tfa" name="tfa" size="18" autocomplete="off"><button type="submit">Войти</button></form>
+{% elif challenge and challenge.status == "expired" %}<p>QR-код истёк. Создайте новый.</p>
+{% elif challenge and challenge.status == "error" %}<p>Вход не завершён. Повторите попытку или войдите по номеру.</p>
+{% endif %}
+{% if not challenge or challenge.status != "password" %}<form action="/auth/qr" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">{% if challenge %}Создать новый QR{% else %}Создать QR-код{% endif %}</button></form>{% endif %}
+<p><a href="/auth?restart=1">Войти по номеру</a></p>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Настройки · Тапкофон{% endblock %}
+{% block content %}
+<h1>Настройки телефона</h1>
+{% if request.query_params.get("saved") == "1" %}<p class="notice">Настройки сохранены</p>{% endif %}
+{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+<form action="/settings" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<label><input type="checkbox" name="simple_html" value="true"{% if prefs.simple_html %} checked{% endif %}> Простое отображение без оформления</label>
+<p class="muted">Включите, если браузер неправильно показывает страницы.</p>
+<label><input type="checkbox" name="show_images" value="true"{% if prefs.show_images %} checked{% endif %}> Показывать картинки в чатах и профилях</label>
+<p class="muted">Если выключено, фотографии открываются только по ссылке.</p>
+<label for="page-size">Чатов и сообщений на странице</label><select id="page-size" name="page_size">{% for size in [5,10,20] %}<option value="{{ size }}"{% if prefs.page_size == size %} selected{% endif %}>{{ size }}</option>{% endfor %}</select>
+<label for="image-size">Размер миниатюр</label><select id="image-size" name="image_size">{% for size in [128,176,240] %}<option value="{{ size }}"{% if prefs.image_size == size %} selected{% endif %}>{{ size }} пикселей</option>{% endfor %}</select>
+<label for="text-limit">Длина текста в списке сообщений</label><select id="text-limit" name="text_limit">{% for limit in [300,600,1200] %}<option value="{{ limit }}"{% if prefs.text_limit == limit %} selected{% endif %}>{{ limit }} символов</option>{% endfor %}</select>
+<p><button type="submit">Сохранить настройки</button></p>
+</form>
+<p class="muted">Настройки и избранное сохраняются для этого браузера. Для их восстановления нужны cookies.</p>
+<p><a href="/cache">Кеш файлов</a></p>
+{% if can_admin %}<p><a href="/admin">Общие настройки и пароль</a></p>{% endif %}
+{% endblock %}

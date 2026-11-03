@@ -1,14 +1,1 @@
-<!--
- Copyright 2022 d4n13l3k00.
- SPDX-License-Identifier: 	AGPL-3.0-or-later
--->
-
-{% if msg %}
-    <p>{{ msg }}</p>
-{% endif %}
-<form action="/pass" method="get">
-    <p>Введите пароль от тапкофона</p>
-    <input type="password" name="password">
-    <p></p>
-    <button type="submit">Открыть тапкофон</button>
-</form>
+{% extends "base.html" %}{% block title %}Пароль · Тапкофон{% endblock %}{% block content %}<h1>Открыть Тапкофон</h1>{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}<form action="/pass" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label for="password">Пароль доступа</label><input id="password" type="password" name="password" size="18"><button type="submit">Открыть</button></form>{% endblock %}

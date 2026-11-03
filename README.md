@@ -1,21 +1,24 @@
-
 <div align="center">
 
 # 👞 Tapkofon
 
 ![Telegram](https://img.shields.io/badge/Telegram-blue?style=flat&logo=telegram)
-![CodeStyle](https://img.shields.io/badge/code%20style-black-black)
+[![Code style: Ruff](https://img.shields.io/badge/code%20style-Ruff-D7FF64)](https://docs.astral.sh/ruff/)
 ![GitHub contributors](https://img.shields.io/github/contributors/D4n13l3k00/tapkofon)
-![GitHub](https://img.shields.io/github/license/D4n13l3k00/tapkofon)
+![GitHub license](https://img.shields.io/github/license/D4n13l3k00/tapkofon)
 
-[![DeepSource](https://deepsource.io/gh/D4n13l3k00/tapkofon.svg/?label=active+issues&token=zBpkbE5y6_lXYxJ6RtPVrJQ1)](https://deepsource.io/gh/D4n13l3k00/tapkofon/?ref=repository-badge)
-[![DeepSource](https://deepsource.io/gh/D4n13l3k00/tapkofon.svg/?label=resolved+issues&token=zBpkbE5y6_lXYxJ6RtPVrJQ1)](https://deepsource.io/gh/D4n13l3k00/tapkofon/?ref=repository-badge)
+[![Checks](https://github.com/D4n13l3k00/tapkofon/actions/workflows/ci.yml/badge.svg)](https://github.com/D4n13l3k00/tapkofon/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/D4n13l3k00/tapkofon)](https://github.com/D4n13l3k00/tapkofon/releases/latest)
 
 ### Представляю вам свой мини-проект **Tapkofon** - минималистичный веб-клиент Telegram'а на Telethon, FastAPI, сделанный преимущественно для кнопочных телефонов
 
 </div>
 
-[Идея взята отсюда](https://github.com/xadjilut/microclient)
+Минималистичный веб-клиент Telegram для кнопочных телефонов и медленного интернета.
+Обычный HTML, формы и cookies, без JavaScript. Работает на Telethon и FastAPI.
+[Идея microclient](https://github.com/xadjilut/microclient).
+
+---
 
 ### 📜 Для чего это / Где это можно использовать?
 
@@ -24,81 +27,145 @@
 - Место с очень низкой скоростью интернета
 - Для постоянного использования (мазохизм)
 
+---
+
 ### 💖 Фишки
 
-- Пароль доступа (cookie) ([config.py](/config.py#L11)). Пароль по умолчанию выключен, но вы можете его включить в конфиге.
-- Система кэша (при загрузке файла он скачивается на сервер в кэш директорию, и оттуда отправляется вам)
-- Конвертирование не mp3 аудио в mp3 для лучшей совместимости
-- Распознавание речи в голосовых сообщениях
-- Подгонка фото под определённый размер и сжатие([config.py](/config.py#L21)) для лучшей совместимости
-- Смайлики в сообщениях превращаются в текст (тапики не поддерживают соверменные юникод смайлики)
-- Возможность просмотра профиля пользователя (аватарка, юзерка , био)
+- Вход по номеру или QR, включая облачный пароль.
+- Чаты, ответы, редактирование и удаление сообщений, вложения.
+- Непрочитанные и избранные чаты, черновики и быстрые ответы.
+- Кэш файлов, сжатие фото и аватарок, текстовый режим.
+- Конвертация аудио в MP3 и распознавание речи через Google. Распознавание можно отключить.
+- Смайлики превращаются в текст (тапики не поддерживают современные юникод смайлики).
+- Просмотр профиля пользователя (аватарка, юзерка, био).
+- Пароль доступа к клиенту.
+
+---
 
 ### 😢 Баги (куда же без багов?)
 
-- Не работает авторизация при включённом облачном пароле (только в вебе)
-- Если найдешь баг, [пиши сюда](https://t.me/D4n13l3k00)
+Если найдешь баг, [пиши сюда](https://t.me/D4n13l3k00).
+
+---
 
 ## 🔝 Быстрый старт
 
-```bash
-git clone https://github.com/D4n13l3k00/tapkofon
-cd tapkofon
-apt install python3 python3-venv python3-pip python3-setuptools ffmpeg -y
-chmod +x *.sh
-./local_deploy.sh
-./run.sh
+Рекомендуется [uv](https://docs.astral.sh/uv/getting-started/installation/). Он установит приложение в отдельное окружение и при необходимости скачает Python 3.14.
+
+```console
+uv tool install --python 3.14 https://github.com/D4n13l3k00/tapkofon/releases/download/v2.0.0/tapkofon-2.0.0-py3-none-any.whl
+tapkofon
 ```
+
+Откройте <http://127.0.0.1:8888>. При первом запуске создаётся `session/config.toml`. Остановите сервер, укажите в нём свои `api_id` и `api_hash` из [my.telegram.org/apps](https://my.telegram.org/apps), затем запустите снова и войдите в Telegram.
+
+Если команда не найдена, выполните `uv tool update-shell` и откройте новый терминал. В PyPI пакет не опубликован, установка идёт из GitHub Releases.
+
+---
 
 ## 🔻 Установка
 
-### 1. Установите Python 🐍
+### Через pipx 📦
 
-[Python](https://www.python.org/downloads/)
+Нужны [pipx](https://pipx.pypa.io/stable/installation/) и установленный Python 3.12 или новее. Пример для Python 3.14:
 
-### 2. Клонируйте репозиторий 📩
-
-Клонируйте репозиторий
-
-```bash
-git clone https://github.com/D4n13l3k00/tapkofon
-cd tapkofon
+```console
+pipx install --python 3.14 https://github.com/D4n13l3k00/tapkofon/releases/download/v2.0.0/tapkofon-2.0.0-py3-none-any.whl
+tapkofon
 ```
 
-### 3. Установите зависимости 📦
+Если pipx не находит Python, укажите путь к интерпретатору вместо `3.14`. Если не найдена команда `tapkofon`, выполните `pipx ensurepath` и откройте новый терминал.
 
-```bash
-apt install ffmpeg -y
+Установка через **pip не рекомендуется**. Если используете его, устанавливайте wheel из [релиза](https://github.com/D4n13l3k00/tapkofon/releases/latest) только в отдельный venv, не в системный Python.
 
-python3 -m pip install --user -r requirements.txt
+---
+
+### FFmpeg
+
+Для конвертации аудио и распознавания речи нужен FFmpeg в `PATH`:
+
+- Linux: `sudo apt install ffmpeg`
+- Windows: `winget install Gyan.FFmpeg`
+- macOS: `brew install ffmpeg`
+
+---
+
+### Запуск 🚀
+
+```console
+tapkofon                              # запуск на localhost:8888
+tapkofon serve --host 0.0.0.0          # доступ с телефона
+tapkofon password set                 # пароль доступа
+tapkofon login --qr                   # вход из терминала при остановленном сервере
+tapkofon --help                       # остальные команды
 ```
 
-### 4. Запуск 🚀
+Перед доступом извне задайте пароль. Для интернета используйте HTTPS и `cookie_secure = true` в конфиге. Один экземпляр приложения работает с одним Telegram-аккаунтом. Не запускайте несколько workers с одной сессией.
 
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000
+---
+
+### Сессия и настройки
+
+Данные лежат в `session/` относительно папки запуска. Для постоянного пути задайте `TAPKOFON_DATA_DIR` или `--data-dir` перед подкомандой:
+
+```console
+tapkofon --data-dir "C:/Users/USERNAME/AppData/Local/tapkofon" serve
 ```
 
-Клиент будет доступен на порту `8000` (вы можете изменить его на любой другой)
+В примере замените `USERNAME` своим именем пользователя. Для всех команд используйте тот же каталог.
 
-Документация API на `/docs`
+- `config.toml`: Telegram API и серверные параметры. После изменения перезапустите сервер.
+- `session.session`: авторизация Telegram. Не передавайте этот файл другим.
+- `tapkofon.sqlite3`: настройки, черновики, избранное и веб-сессии.
+- `cache/`: скачанные файлы.
+
+Настройки клиента доступны в вебе, общие настройки и пароль на `/admin`. Базы не зашифрованы, поэтому закройте посторонним доступ к каталогу данных.
+
+---
+
+### Обновление
+
+Остановите сервер и сохраните копию каталога данных. Повторите команду установки с `--force` и ссылкой на wheel нужного [релиза](https://github.com/D4n13l3k00/tapkofon/releases). Запустите приложение с прежним каталогом данных.
+
+Старый `run.sh` заменён командой `tapkofon`. Изменения версии перечислены в [CHANGELOG.md](CHANGELOG.md).
+
+---
 
 ### 5? Докер 🐳
 
-Билд: `docker build -t tapik .`
+```console
+git clone https://github.com/D4n13l3k00/tapkofon.git
+cd tapkofon
+docker compose up --build -d
+```
 
-Создаём volume для сохранения сессии: `docker volume create tapik-session`
+Порт по умолчанию `127.0.0.1:8888`, данные в `./session/`. На Linux перед запуском создайте каталог с правами для UID 1000: `mkdir -p session && sudo chown 1000:1000 session`.
 
-Запуск: `docker run -itd -p 8888:8888 -v tapik-session:/root/session tapik`
+Пароль: `docker compose exec tapkofon tapkofon password set`.
 
-Можно использовать docker-compose: `docker-compose up -d`
+---
 
-P.S: доступен деплой на [Okteto](https://cloud.okteto.com/#/deploy?repository=https://github.com/D4n13l3k00/tapkofon)
+## Разработка
+
+В клонированном репозитории:
+
+```console
+uv sync --locked
+uv run tapkofon serve --reload
+uv run ruff check .
+uv run pyright
+uv run pytest -q
+uv build
+```
+
+---
 
 ### P.S 🤫
 
-Для корректной работы необходимо установить свои `api_id` и `api_hash` в `config.toml` (генерируется при запуске в папке session)
+Не забудьте свои `api_id` и `api_hash`. Без них вход в Telegram не заработает.
 
-Из-за этого может не приходить код для авторизации (проверено лично)
+---
 
-Получить их можно [здесь](https://my.telegram.org/apps)
+# Лицензия
+
+[AGPL-3.0-or-later](LICENSE)

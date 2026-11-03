@@ -1,84 +1,11 @@
-<!--
- Copyright 2022 d4n13l3k00.
- SPDX-License-Identifier: 	AGPL-3.0-or-later
--->
-
-<a href="/">К списку чатов</a>
-<h4>Чат - {{ chat.title or chat.first_name }}</h4>
-<form enctype="multipart/form-data" action="/chat/{{ chat.id }}/send_message" method="post">
-    <input type="text" name="text" placeholder="Введите текст...">
-    <input type="file" name="file">
-    <button type="submit">»</button>
-</form>
-{% if page == 0 %}
-    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
-{% elif page > 0 %}
-    <a href="/chat/{{ chat.id }}">К началу</a>
-    <a href="/chat/{{ chat.id }}?page={{ page-1 }}">«-</a>
-    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
-{% endif %}
-{% if messages %}
-    {% for m in messages %}
-        <hr>
-        {% if m.mentioned %}
-            <small><strong>Вас тегнул</strong></small>
-        {% endif %}
-            <strong><a href="/user/{{ m.sender.id }}">{{ m.sender.first_name or m.sender.title }}</a></strong>
-        {% if m.reply %}
-        <br>
-        <p>
-            <strong>Отв к</strong> {{ m.reply.name }} <br>
-            {% if m.reply.file %}
-                <br>
-                {% if m.reply.file.typ == "image" %}
-                    <a href="/chat/{{ chat.id }}/download/{{ m.reply.id }}">
-                        <img src="/chat/{{ chat.id }}/download/{{ m.reply.id }}" alt="Фото {{ m.reply.id }}">
-                    </a>
-                {% else %}
-                    <a href="/chat/{{ chat.id }}/download/{{ m.reply.id }}">
-                        [Файл {{ m.reply.file.filename }} ({{ m.reply.file.size }} | {{ m.reply.file.type }})]
-                    </a>
-                {% endif %}
-            {% endif %}
-            {% if m.reply.text %}
-                <br>
-                <small>{{ m.reply.text|safe }}</small>
-            {% endif %}
-        </p>
-        <p>------------</p>
-        {% endif %}
-        {% if m.file %}
-            <br>
-            {% if m.file.typ == "image" %}
-                <a href="/chat/{{ chat.id }}/download/{{ m.id }}"><img src="/chat/{{ chat.id }}/download/{{ m.id }}"
-                    alt="Фото {{ m.id }}"></a>
-            {% elif m.file.type == "audio/ogg" %}
-                <a href="/chat/{{ chat.id }}/recognize/{{ m.id }}">Войс [rc]</a>
-                <a href="/chat/{{ chat.id }}/download/{{ m.id }}">Войс [dl]</a>
-            {% else %}
-                <a href="/chat/{{ chat.id }}/download/{{ m.id }}">[Файл {{ m.file.filename }} ({{ m.file.size }} | {{ m.file.type
-                }})]</a>
-            {% endif %}
-            <br>
-        {% endif %}
-        {% if m.text %}
-            <p>{{ m.text|safe }}</p>
-        {% endif %}
-            <small>{{ m.date }}</small>
-            <a href="/chat/{{ chat.id }}/reply/{{ m.id }}">Отв</a>
-            <a href="/chat/{{ chat.id }}/delete/{{ m.id }}">Удал</a>
-        {% if m.out %}
-            <a href="/chat/{{ chat.id }}/edit/{{ m.id }}">Измен</a>
-        {% endif %}
-    {% endfor %}
-{% else %}
-    <p>Сообщение пока нет...</p>
-{% endif %}
-<hr>
-{% if page == 0 %}
-    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
-{% elif page > 0 %}
-    <a href="/chat/{{ chat.id }}">К началу</a>
-    <a href="/chat/{{ chat.id }}?page={{ page-1 }}">«-</a>
-    <a href="/chat/{{ chat.id }}?page={{ page+1 }}">-»</a>
-{% endif %}
+{% extends "base.html" %}
+{% import "macros.html" as ui with context %}
+{% block title %}{{ chat.title or chat.first_name }} · Тапкофон{% endblock %}
+{% block content %}
+<h1>{{ chat.title or chat.first_name or "Чат" }}</h1>
+{% if sent %}<p class="notice">Сообщение отправлено</p>{% endif %}
+{{ ui.chat_nav(chat_id, older, newer, browsing_history) }}
+{% for message in messages %}{{ ui.message(message, chat_id, prefs) }}{% else %}<p>На этой странице сообщений нет.</p>{% endfor %}
+{{ ui.chat_nav(chat_id, older, newer, browsing_history) }}
+<form action="/chat/{{ chat_id }}/favorite" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">{% if favorite %}Убрать из избранного{% else %}В избранное{% endif %}</button></form>
+{% endblock %}

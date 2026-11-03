@@ -1,0 +1,58 @@
+[project]
+name = "tapkofon"
+version = "2.0.0"
+description = "Minimal Telegram web client for feature phones"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "AGPL-3.0-or-later"
+authors = [{ name = "d4n13l3k00" }]
+dependencies = [
+    "argon2-cffi>=25.1.0",
+    "audioop-lts>=0.2.2; python_version >= '3.13'",
+    "emoji>=2.16.0",
+    "fastapi>=0.143.0",
+    "jinja2>=3.1.6",
+    "pillow>=12.3.0",
+    "pydantic>=2.14.0",
+    "python-multipart>=0.0.32",
+    "qrcode>=8.2",
+    "rich>=15.0.0",
+    "speechrecognition>=3.17.0",
+    "telethon>=1.45.0,<2",
+    "tomli-w>=1.2.0",
+    "tortoise-orm>=1.1.8",
+    "typer>=0.27.3",
+    "tzdata>=2026.5",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+tapkofon = "tapkofon.__main__:main"
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.13.1",
+    "pyright>=1.1.414",
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
+]
+
+[build-system]
+requires = ["hatchling>=1.32.4"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+ignore = ["E501", "B008"]
+
+[tool.ruff.format]
+line-ending = "lf"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.tortoise]
+tortoise_orm = "tapkofon.database.TORTOISE_ORM"

@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui with context %}
+{% block title %}Сообщение · Тапкофон{% endblock %}
+{% block content %}<h1>Сообщение полностью</h1><p><a href="/chat/{{ chat_id }}">Назад в чат</a></p>{{ ui.message(message, chat_id, prefs) }}{% endblock %}

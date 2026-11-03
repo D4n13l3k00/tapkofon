@@ -1,0 +1,35 @@
+{% macro file(media, chat, id, prefs) %}
+{% if media %}
+{% if media.typ == "image" %}
+{% if prefs.show_images %}<p><a href="/chat/{{ chat }}/media/{{ id }}"><img src="/chat/{{ chat }}/download/{{ id }}" width="{{ 128 if prefs.simple_html else prefs.image_size }}" alt="Фото"></a></p>{% endif %}
+<a href="/chat/{{ chat }}/media/{{ id }}">Фото · {{ media.size }}</a>
+{% elif media.typ == "audio" %}
+<a href="/chat/{{ chat }}/media/{{ id }}">Аудио · {{ media.size }}</a>{% if shared.recognize_enabled %} · <a href="/chat/{{ chat }}/recognize/{{ id }}">Распознать</a>{% endif %}
+{% else %}
+<a href="/chat/{{ chat }}/download/{{ id }}">{{ media.filename or "Скачать файл" }} · {{ media.size }}</a>
+{% endif %}
+{% endif %}
+{% endmacro %}
+{% macro chat_nav(chat, older, newer, browsing_history) %}
+<div class="nav"><a href="/">Чаты</a> <a href="/chat/{{ chat }}/compose">Написать</a> <a href="/chat/{{ chat }}">Обновить</a><br>
+{% if newer %}<a href="/chat/{{ chat }}?after={{ newer }}">Новые сообщения</a>{% endif %}
+{% if browsing_history %}<a href="/chat/{{ chat }}">К последним</a>{% endif %}
+{% if older %}<a href="/chat/{{ chat }}?before={{ older }}">Старые сообщения</a>{% endif %}
+</div>
+{% endmacro %}
+{% macro message(m, chat, prefs) %}
+<div class="item">
+{% if m.sender %}<strong><a href="/user/{{ m.sender.id }}">{{ m.sender.first_name or m.sender.title or "Неизвестно" }}</a></strong>{% else %}<strong>Неизвестно</strong>{% endif %}
+{% if m.mentioned %}<span class="muted"> · Вас упомянули</span>{% endif %}
+{% if m.reply %}
+<div class="notice"><span class="muted">Ответ: {{ m.reply.name }}</span>
+{{ file(m.reply.file, chat, m.reply.id, prefs) }}
+{% if m.reply.text %}<div class="text">{{ m.reply.text|safe }}{% if m.reply.truncated %}… <a href="/chat/{{ chat }}/message/{{ m.reply.id }}">Полностью</a>{% endif %}</div>{% endif %}
+</div>
+{% endif %}
+{{ file(m.file, chat, m.id, prefs) }}
+{% if m.text %}<p class="text">{{ m.text|safe }}{% if m.truncated %}… <a href="/chat/{{ chat }}/message/{{ m.id }}">Полностью</a>{% endif %}</p>{% endif %}
+<div class="muted">{{ m.date }}</div>
+<a href="/chat/{{ chat }}/reply/{{ m.id }}">Ответить</a> · <a href="/chat/{{ chat }}/delete/{{ m.id }}">Удалить</a>{% if m.out %} · <a href="/chat/{{ chat }}/edit/{{ m.id }}">Изменить</a>{% endif %}
+</div>
+{% endmacro %}

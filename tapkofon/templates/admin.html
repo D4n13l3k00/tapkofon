@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Общие настройки · Тапкофон{% endblock %}
+{% block content %}
+<h1>Общие настройки</h1>
+<p>Эти настройки действуют для всех телефонов.</p>
+{% if request.query_params.get("saved") == "settings" %}<p class="notice">Общие настройки сохранены</p>{% endif %}
+{% if request.query_params.get("saved") == "password" %}<p class="notice">Пароль сохранён. Доступ на остальных устройствах отозван</p>{% endif %}
+{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+<h2>Изображения и текст</h2>
+<form action="/admin/settings" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<label for="quality">Качество изображений (1–100)</label><input type="text" inputmode="numeric" id="quality" name="pic_quality" size="4" value="{{ shared.pic_quality }}">
+<label for="format">Формат аватаров</label><select id="format" name="pic_format">{% for format in ["jpeg", "png", "webp"] %}<option value="{{ format }}"{% if shared.pic_format == format %} selected{% endif %}>{{ format|upper }}</option>{% endfor %}</select>
+<p class="muted">Для старых телефонов выбирайте JPEG. Миниатюры сообщений всегда JPEG.</p>
+<label><input type="checkbox" name="msg_regex_tme" value="true"{% if shared.msg_regex_tme %} checked{% endif %}> Открывать ссылки t.me внутри Тапкофона</label>
+<label><input type="checkbox" name="recognize_enabled" value="true"{% if shared.recognize_enabled %} checked{% endif %}> Разрешить распознавание через Google</label>
+<label for="language">Язык распознавания</label><input type="text" id="language" name="recognize_lang" size="12" value="{{ shared.recognize_lang }}">
+<p class="muted">Русский: ru-RU, английский: en-US. При распознавании звук отправляется в Google.</p>
+<p><button type="submit">Сохранить общие настройки</button></p>
+</form>
+<h2>Пароль доступа</h2>
+<p>{% if enabled %}Защита включена.{% else %}Защита выключена. Клиент открыт всем, кто может подключиться к серверу.{% endif %}</p>
+<form action="/admin/password" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+{% if enabled %}<label for="current">Текущий пароль</label><input id="current" type="password" name="current_password" size="18" maxlength="256" autocomplete="current-password">{% endif %}
+<label for="new">Новый пароль (не менее {{ password_min }} символов)</label><input id="new" type="password" name="new_password" size="18" maxlength="256" autocomplete="new-password">
+<label for="repeat">Повторите новый пароль</label><input id="repeat" type="password" name="repeat_password" size="18" maxlength="256" autocomplete="new-password">
+<p><button type="submit" name="action" value="change">{% if enabled %}Сменить пароль{% else %}Включить защиту{% endif %}</button></p>
+{% if enabled %}<label><input type="checkbox" name="confirm_open_access" value="true"> Подтверждаю открытый доступ без пароля</label><button type="submit" name="action" value="disable">Отключить пароль</button>{% endif %}
+</form>
+<p class="muted">После смены пароля другие браузеры должны войти снова. Если пароль забыт, его можно сбросить на сервере.</p>
+<p><a href="/settings">Настройки этого телефона</a></p>
+{% endblock %}
